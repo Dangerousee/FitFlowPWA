@@ -1,0 +1,169 @@
+:root {
+    /* Margin Sizes */
+    --margin-xxxs: 2px;
+    --margin-xxs: 4px;
+    --margin-xs: 8px;
+    --margin-s: 12px;
+    --margin-m: 16px;
+    --margin-l: 20px;
+    --margin-xl: 24px;
+    --margin-xxl: 32px;
+    --margin-xxxl: 40px;
+
+    /* Padding Sizes */
+    --padding-xxxs: 2px;
+    --padding-xxs: 4px;
+    --padding-xs: 8px;
+    --padding-s: 12px;
+    --padding-m: 16px;
+    --padding-l: 20px;
+    --padding-xl: 24px;
+    --padding-xxl: 32px;
+    --padding-xxxl: 40px;
+}
+
+/* Margin 적용 */
+.m-xxxs { margin: var(--margin-xxxs); }
+.m-xxs { margin: var(--margin-xxs); }
+.m-xs { margin: var(--margin-xs); }
+.m-s { margin: var(--margin-s); }
+.m-m { margin: var(--margin-m); } /* Base size */
+.m-l { margin: var(--margin-l); }
+.m-xl { margin: var(--margin-xl); } /* Base size */
+.m-xxl { margin: var(--margin-xxl); }
+.m-xxxl { margin: var(--margin-xxxl); }
+
+/* Margin Left 적용 */
+.ml-xxxs { margin-left: var(--margin-xxxs); }
+.ml-xxs { margin-left: var(--margin-xxs); }
+.ml-xs { margin-left: var(--margin-xs); }
+.ml-s { margin-left: var(--margin-s); }
+.ml-m { margin-left: var(--margin-m); }
+.ml-l { margin-left: var(--margin-l); }
+.ml-xl { margin-left: var(--margin-xl); }
+.ml-xxl { margin-left: var(--margin-xxl); }
+.ml-xxxl { margin-left: var(--margin-xxxl); }
+
+/* Margin Right 적용 */
+.mr-xxxs { margin-right: var(--margin-xxxs); }
+.mr-xxs { margin-right: var(--margin-xxs); }
+.mr-xs { margin-right: var(--margin-xs); }
+.mr-s { margin-right: var(--margin-s); }
+.mr-m { margin-right: var(--margin-m); }
+.mr-l { margin-right: var(--margin-l); }
+.mr-xl { margin-right: var(--margin-xl); }
+.mr-xxl { margin-right: var(--margin-xxl); }
+.mr-xxxl { margin-right: var(--margin-xxxl); }
+
+/* Margin Top 적용 */
+.mt-xxxs { margin-top: var(--margin-xxxs); }
+.mt-xxs { margin-top: var(--margin-xxs); }
+.mt-xs { margin-top: var(--margin-xs); }
+.mt-s { margin-top: var(--margin-s); }
+.mt-m { margin-top: var(--margin-m); }
+.mt-l { margin-top: var(--margin-l); }
+.mt-xl { margin-top: var(--margin-xl); }
+.mt-xxl { margin-top: var(--margin-xxl); }
+.mt-xxxl { margin-top: var(--margin-xxxl); }
+
+/* Margin Bottom 적용 */
+.mb-xxxs { margin-bottom: var(--margin-xxxs); }
+.mb-xxs { margin-bottom: var(--margin-xxs); }
+.mb-xs { margin-bottom: var(--margin-xs); }
+.mb-s { margin-bottom: var(--margin-s); }
+.mb-m { margin-bottom: var(--margin-m); }
+.mb-l { margin-bottom: var(--margin-l); }
+.mb-xl { margin-bottom: var(--margin-xl); }
+.mb-xxl { margin-bottom: var(--margin-xxl); }
+.mb-xxxl { margin-bottom: var(--margin-xxxl); }
+
+/* Padding 적용 */
+.p-xxxs { padding: var(--padding-xxxs); }
+.p-xxs { padding: var(--padding-xxs); }
+.p-xs { padding: var(--padding-xs); }
+.p-s { padding: var(--padding-s); }
+.p-m { padding: var(--padding-m); } /* Base size */
+.p-l { padding: var(--padding-l); }
+.p-xl { padding: var(--padding-xl); } /* Base size */
+.p-xxl { padding: var(--padding-xxl); }
+.p-xxxl { padding: var(--padding-xxxl); }
+
+/* Padding Left 적용 */
+.pl-xxxs { padding-left: var(--padding-xxxs); }
+.pl-xxs { padding-left: var(--padding-xxs); }
+.pl-xs { padding-left: var(--padding-xs); }
+.pl-s { padding-left: var(--padding-s); }
+.pl-m { padding-left: var(--padding-m); }
+.pl-l { padding-left: var(--padding-l); }
+.pl-xl { padding-left: var(--padding-xl); }
+.pl-xxl { padding-left: var(--padding-xxl); }
+.pl-xxxl { padding-left: var(--padding-xxxl); }
+
+/* Padding Right 적용 */
+.pr-xxxs { padding-right: var(--padding-xxxs); }
+.pr-xxs { padding-right: var(--padding-xxs); }
+.pr-xs { padding-right: var(--padding-xs); }
+.pr-s { padding-right: var(--padding-s); }
+.pr-m { padding-right: var(--padding-m); }
+.pr-l { padding-right: var(--padding-l); }
+.pr-xl { padding-right: var(--padding-xl); }
+.pr-xxl { padding-right: var(--padding-xxl); }
+.pr-xxxl { padding-right: var(--padding-xxxl); }
+
+/* Padding Top 적용 */
+.pt-xxxs { padding-top: var(--padding-xxxs); }
+.pt-xxs { padding-top: var(--padding-xxs); }
+.pt-xs { padding-top: var(--padding-xs); }
+.pt-s { padding-top: var(--padding-s); }
+.pt-m { padding-top: var(--padding-m); }
+.pt-l { padding-top: var(--padding-l); }
+.pt-xl { padding-top: var(--padding-xl); }
+.pt-xxl { padding-top: var(--padding-xxl); }
+.pt-xxxl { padding-top: var(--padding-xxxl); }
+
+/* Padding Bottom 적용 */
+.pb-xxxs { padding-bottom: var(--padding-xxxs); }
+.pb-xxs { padding-bottom: var(--padding-xxs); }
+.pb-xs { padding-bottom: var(--padding-xs); }
+.pb-s { padding-bottom: var(--padding-s); }
+.pb-m { padding-bottom: var(--padding-m); }
+.pb-l { padding-bottom: var(--padding-l); }
+.pb-xl { padding-bottom: var(--padding-xl); }
+.pb-xxl { padding-bottom: var(--padding-xxl); }
+.pb-xxxl { padding-bottom: var(--padding-xxxl); }
+
+/** Element size */
+.elm-size-xxxs { height: 20px; width: 20px; }
+.elm-size-xxs { height: 24px; width: 24px; }
+.elm-size-xs { height: 28px; width: 28px; }
+.elm-size-s { height: 32px; width: 32px; }
+.elm-size-m { height: 36px; width: 36px; }
+.elm-size-l { height: 44px; width: 44px; }
+.elm-size-xl { height: 48px; width: 48px; }
+.elm-size-xxl { height: 52px; width: 52px; }
+.elm-size-xxxl { height: 56px; width: 56px; }
+
+.elm-width-xxxs { width: 20px; }
+.elm-width-xxs { width: 24px; }
+.elm-width-xs { width: 28px; }
+.elm-width-s { width: 32px; }
+.elm-width-m { width: 36px; }
+.elm-width-l { width: 44px; }
+.elm-width-xl { width: 48px; }
+.elm-width-xxl { width: 52px; }
+.elm-width-xxxl { width: 56px; }
+
+.elm-height-xxxs { height: 20px; }
+.elm-height-xxs { height: 24px; }
+.elm-height-xs { height: 28px; }
+.elm-height-s { height: 32px; }
+.elm-height-m { height: 36px; }
+.elm-height-l { height: 44px; }
+.elm-height-xl { height: 48px; }
+.elm-height-xxl { height: 52px; }
+.elm-height-xxxl { height: 56px; }
+
+.elm-min-width {
+    min-width: 140px;
+}
+

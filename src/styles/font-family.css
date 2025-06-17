@@ -1,0 +1,80 @@
+/* src/styles/font-family.css */
+:root {
+    /* Naver NanumSquare 폰트 변수 선언 */
+    --font-nanum-square: 'NanumSquare', Arial, Helvetica, sans-serif;
+    /* Gmarket Sans 폰트 변수 선언 */
+    --font-gmarket: 'GmarketSans', Arial, Helvetica, sans-serif;
+    /* --font-roboto 변수는 next/font에 의해 자동으로 주입됩니다. */
+    --font-weight-default: 300; /* 기본 weight을 Regular(400)로 설정 (나눔스퀘어 기준) */
+}
+
+/* Naver NanumSquare Light */
+@font-face {
+    font-family: 'NanumSquare';
+    src: url('/fonts/NanumSquare/OTF/NanumSquareL.otf') format('opentype'),
+    url('/fonts/NanumSquare/TTF/NanumSquareL.ttf') format('truetype');
+    font-weight: 300; /* Light */
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Naver NanumSquare Regular */
+@font-face {
+    font-family: 'NanumSquare';
+    src: url('/fonts/NanumSquare/OTF/NanumSquareR.otf') format('opentype'),
+    url('/fonts/NanumSquare/TTF/NanumSquareR.ttf') format('truetype');
+    font-weight: 400; /* Regular */
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Naver NanumSquare Bold */
+@font-face {
+    font-family: 'NanumSquare';
+    src: url('/fonts/NanumSquare/OTF/NanumSquareN.otf') format('opentype'),
+    url('/fonts/NanumSquare/TTF/NanumSquareN.ttf') format('truetype');
+    font-weight: 700; /* Bold */
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Naver NanumSquare ExtraBold */
+@font-face {
+    font-family: 'NanumSquare';
+    src: url('/fonts/NanumSquare/OTF/NanumSquareEB.otf') format('opentype'),
+    url('/fonts/NanumSquare/TTF/NanumSquareEB.ttf') format('truetype');
+    font-weight: 800; /* ExtraBold */
+    font-style: normal;
+    font-display: swap;
+}
+
+
+/* Gmarket Sans Light */
+@font-face {
+    font-family: 'GmarketSans';
+    src: url('/fonts/GmarketSans/OTF/GmarketSansLight.otf') format('opentype'),
+    url('/fonts/GmarketSans/TTF/GmarketSansTTFLight.ttf') format('truetype');
+    font-weight: 300; /* Light */
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Gmarket Sans Medium */
+@font-face {
+    font-family: 'GmarketSans';
+    src: url('/fonts/GmarketSans/OTF/GmarketSansMedium.otf') format('opentype'),
+    url('/fonts/GmarketSans/TTF/GmarketSansTTFMedium.ttf') format('truetype');
+    font-weight: 500; /* Medium */
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Gmarket Sans Bold */
+@font-face {
+    font-family: 'GmarketSans';
+    src: url('/fonts/GmarketSans/OTF/GmarketSansBold.otf') format('opentype'),
+    url('/fonts/GmarketSans/TTF/GmarketSansTTFBold.ttf') format('truetype');
+    font-weight: 700; /* Bold */
+    font-style: normal;
+    font-display: swap;
+}

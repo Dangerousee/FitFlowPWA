@@ -1,0 +1,179 @@
+/** @ref: https://gds.gmarket.co.kr/foundation/color */
+:root {
+    --gray-900: #222222;
+    --gray-800: #424242;
+    --gray-700: #616161;
+    --gray-600: #757575;
+    --gray-500: #9E9E9E;
+    --gray-400: #BDBDBD;
+    --gray-300: #E0E0E0;
+    --gray-200: #EEEEEE;
+    --gray-100: #F5F5F5;
+    --gray-50: #FAFAFA;
+
+    --yellow-900: #592500;
+    --yellow-800: #864300;
+    --yellow-700: #AC6600;
+    --yellow-600: #CF8800;
+    --yellow-500: #EAAD06;
+    --yellow-400: #FFCC1F;
+    --yellow-300: #FFE65C;
+    --yellow-200: #FFF6A3;
+    --yellow-100: #FDF8CB;
+    --yellow-50: #FFFCE5;
+
+    --teal-900: #0A3545;
+    --teal-800: #125A6F;
+    --teal-700: #1D7F97;
+    --teal-600: #2DA2B8;
+    --teal-500: #43BED0;
+    --teal-400: #62D4E2;
+    --teal-300: #89E5EE;
+    --teal-200: #BBF0F6;
+    --teal-100: #D1F5F8;
+    --teal-50: #EAF9FA;
+
+    --indigo-900: #2D2587;
+    --indigo-800: #3931A8;
+    --indigo-700: #4C1CA7;
+    --indigo-600: #5855E2;
+    --indigo-500: #706FF7;
+    --indigo-400: #8A8AFF;
+    --indigo-300: #ABABFF;
+    --indigo-200: #D2D2FF;
+    --indigo-100: #E4E4FF;
+    --indigo-50: #F5F5FF;
+
+    --purple-900: #37188C;
+    --purple-800: #4C1FA7;
+    --purple-700: #662AC0;
+    --purple-600: #823AD5;
+    --purple-500: #9D50E5;
+    --purple-400: #B66EF0;
+    --purple-300: #CE95F8;
+    --purple-200: #E5C4FC;
+    --purple-100: #F0DCF6;
+    --purple-50: #FBF5FF;
+
+    --pink-900: #640A9A;
+    --pink-800: #9C00A3;
+    --pink-700: #BD0088;
+    --pink-600: #D300BE;
+    --pink-500: #E413C3;
+    --pink-400: #EF39CC;
+    --pink-300: #F76DD9;
+    --pink-200: #FCADFC;
+    --pink-100: #FECFF2;
+    --pink-50: #FFF2FC;
+}
+
+.bg-gray-900 { background-color: var(--gray-900); }
+.bg-gray-800 { background-color: var(--gray-800); }
+.bg-gray-700 { background-color: var(--gray-700); }
+.bg-gray-600 { background-color: var(--gray-600); }
+.bg-gray-500 { background-color: var(--gray-500); }
+.bg-gray-400 { background-color: var(--gray-400); }
+.bg-gray-300 { background-color: var(--gray-300); }
+.bg-gray-200 { background-color: var(--gray-200); }
+.bg-gray-100 { background-color: var(--gray-100); }
+.bg-gray-50  { background-color: var(--gray-50); }
+
+.text-gray-900 { color: var(--gray-900); }
+.text-gray-800 { color: var(--gray-800); }
+.text-gray-700 { color: var(--gray-700); }
+.text-gray-600 { color: var(--gray-600); }
+.text-gray-500 { color: var(--gray-500); }
+.text-gray-400 { color: var(--gray-400); }
+.text-gray-300 { color: var(--gray-300); }
+.text-gray-200 { color: var(--gray-200); }
+.text-gray-100 { color: var(--gray-100); }
+.text-gray-50  { color: var(--gray-50); }
+
+.bg-yellow-900 { background-color: var(--yellow-900); }
+.bg-yellow-800 { background-color: var(--yellow-800); }
+.bg-yellow-700 { background-color: var(--yellow-700); }
+.bg-yellow-600 { background-color: var(--yellow-600); }
+.bg-yellow-500 { background-color: var(--yellow-500); }
+.bg-yellow-400 { background-color: var(--yellow-400); }
+.bg-yellow-300 { background-color: var(--yellow-300); }
+.bg-yellow-200 { background-color: var(--yellow-200); }
+.bg-yellow-100 { background-color: var(--yellow-100); }
+.bg-yellow-50  { background-color: var(--yellow-50); }
+
+.bg-teal-900 { background-color: var(--teal-900); }
+.bg-teal-800 { background-color: var(--teal-800); }
+.bg-teal-700 { background-color: var(--teal-700); }
+.bg-teal-600 { background-color: var(--teal-600); }
+.bg-teal-500 { background-color: var(--teal-500); }
+.bg-teal-400 { background-color: var(--teal-400); }
+.bg-teal-300 { background-color: var(--teal-300); }
+.bg-teal-200 { background-color: var(--teal-200); }
+.bg-teal-100 { background-color: var(--teal-100); }
+.bg-teal-50  { background-color: var(--teal-50); }
+
+.bg-indigo-900 { background-color: var(--indigo-900); }
+.bg-indigo-800 { background-color: var(--indigo-800); }
+.bg-indigo-700 { background-color: var(--indigo-700); }
+.bg-indigo-600 { background-color: var(--indigo-600); }
+.bg-indigo-500 { background-color: var(--indigo-500); }
+.bg-indigo-400 { background-color: var(--indigo-400); }
+.bg-indigo-300 { background-color: var(--indigo-300); }
+.bg-indigo-200 { background-color: var(--indigo-200); }
+.bg-indigo-100 { background-color: var(--indigo-100); }
+.bg-indigo-50  { background-color: var(--indigo-50); }
+
+.bg-purple-900 { background-color: var(--purple-900); }
+.bg-purple-800 { background-color: var(--purple-800); }
+.bg-purple-700 { background-color: var(--purple-700); }
+.bg-purple-600 { background-color: var(--purple-600); }
+.bg-purple-500 { background-color: var(--purple-500); }
+.bg-purple-400 { background-color: var(--purple-400); }
+.bg-purple-300 { background-color: var(--purple-300); }
+.bg-purple-200 { background-color: var(--purple-200); }
+.bg-purple-100 { background-color: var(--purple-100); }
+.bg-purple-50  { background-color: var(--purple-50); }
+
+.bg-pink-900 { background-color: var(--pink-900); }
+.bg-pink-800 { background-color: var(--pink-800); }
+.bg-pink-700 { background-color: var(--pink-700); }
+.bg-pink-600 { background-color: var(--pink-600); }
+.bg-pink-500 { background-color: var(--pink-500); }
+.bg-pink-400 { background-color: var(--pink-400); }
+.bg-pink-300 { background-color: var(--pink-300); }
+.bg-pink-200 { background-color: var(--pink-200); }
+.bg-pink-100 { background-color: var(--pink-100); }
+.bg-pink-50  { background-color: var(--pink-50); }
+
+/** Background Color */
+.bg-white { background-color: #fff; } /** 전체 앱의 기본 배경 색상 */
+.bg-off-white { background-color: var(--gray-100); } /** 앱의 두번째 기본 배경 색상 */
+.bg-divider { background-color: var(--gray-200); } /** 디바이더 라인에 사용하는 색상 */
+.bg-card-ui { background-color: var(--gray-50); } /** 목록과 유사한 구성 항목의 구분에 대한 배경 색상 (예시 : 푸터, 카드UI 내 배경) */
+
+/** Text Color */
+.text-cto { background-color: #fff; } /** 상품명 및 가격(숫자 한정, 원 별도) */
+.text-primary { color: var(--gray-900); } /** 제목(Title,Sub Title) 및 본문(Body) 텍스트 색상 */
+.text-secondary	{ color: var(--gray-700); } /** 본문의 하위 위계인 서브 본문(Small) 텍스트 색상 */
+.text-tertiary { color: var(--gray-500); } /** 설명 및 비활성화 텍스트 색상 (예시: 할인 전 가격, 품절) */
+.text-caption { color: var(--gray-400); } /** 법적 규제 텍스트 색상 (예시: 푸터 저작관, 약관) */
+
+/** Border Color */
+.border-active { border: 1px solid; border-color: var(--gray-900); } /** 활성화 시 사용하는 테두리 색상 (예시 : 폼 필드) */
+.border-tertiary { border: var(--gray-300); } /** 콘텐츠 background의 테두리 색상 */
+.border-secondary { border: var(--gray-400); } /** secondary버튼의 테두리 색상 */
+.border-regular { border: 1px solid; border-color: var(--gray-300); }
+.border-error { border: 1px solid red; } /** secondary버튼의 테두리 색상 */
+.border-white { border: #fff; } /** 배경에 thumbnail이 있을 경우 사용하는 테두리 색상 */
+
+.bg-brand { background-color: #282864; }
+.bg-brand-pay { background-color: #313191; }
+.bg-brand-stamp { background-color: #5939DA; }
+.bg-brand-biz { background-color: #102775; }
+.bg-brand-catch { background-color: #280082; }
+
+.bg-brand-club { background-color: #FFD200; }
+.bg-brand-club-300 { background-color: #BC9A6E; }
+.bg-brand-club-400 { background-color: #A78353; }
+.bg-brand-club-500 { background-color: #966E46; }
+
+

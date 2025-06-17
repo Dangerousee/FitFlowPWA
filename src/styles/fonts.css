@@ -1,0 +1,99 @@
+:root {
+    --font-size-xxxl: 24px;
+    --font-size-xxl: 22px;
+    --font-size-xl: 20px;
+    --font-size-l: 18px;
+    --font-size-m: 16px;
+    --font-size-s: 14px;
+    --font-size-xs: 12px;
+    --font-size-xxs: 11px;
+
+    --font-weight-bold: 700;
+    --font-weight-medium: 500;
+    --font-weight-regular: 400;
+}
+
+/** Font size */
+.font-size-xxxl { font-size: var(--font-size-xxxl); line-height: 32px; }
+.font-size-xxl  { font-size: var(--font-size-xxl); line-height: 30px; }
+.font-size-xl   { font-size: var(--font-size-xl); line-height: 28px; }
+.font-size-l    { font-size: var(--font-size-l); line-height: 26px; }
+.font-size-m    { font-size: var(--font-size-m); line-height: 24px; }
+.font-size-s    { font-size: var(--font-size-s); line-height: 20px; }
+.font-size-xs   { font-size: var(--font-size-xs); line-height: 18px; }
+.font-size-xxs  { font-size: var(--font-size-xxs); line-height: 16px; }
+
+/** Font weight */
+.font-weight-bold   { font-weight: var(--font-weight-bold); }
+.font-weight-medium { font-weight: var(--font-weight-medium); }
+.font-weight-regular { font-weight: var(--font-weight-regular); }
+
+/** Heading 1 – 페이지 단위 타이틀 (예: 홈 상단 메시지 등) */
+.text-heading-1 {
+    font-size: var(--font-size-xxxl);
+    font-weight: var(--font-weight-regular);
+    line-height: 32px;
+}
+
+/** Heading 2 – 페이지 단위 타이틀 (예: MyG 상단 메시지 등) */
+.text-heading-2 {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-regular);
+    line-height: 30px;
+}
+
+/** Heading 3 – 템플릿 단위 타이틀 (예: 홈 템플릿 타이틀) */
+.text-heading-3 {
+    font-size:  var(--font-size-xl);
+    font-weight: var(--font-weight-regular);
+    line-height: 28px;
+}
+
+/** Heading 4 – 템플릿 단위 타이틀 (예: 헤더 타이틀) */
+.text-heading-4 {
+    font-size:  var(--font-size-l);
+    font-weight: var(--font-weight-regular);
+    line-height: 26px;
+}
+
+/** Body 1 Bold – 주요 본문 (예: 서브타이틀) */
+.text-body-1-bold {
+    font-size:  var(--font-size-m);
+    font-weight: var(--font-weight-bold);
+    line-height: 24px;
+}
+
+/** Body 1 Regular – 주요 본문 (예: 리스트) */
+.text-body-1-regular {
+    font-size:  var(--font-size-m);
+    font-weight: var(--font-weight-regular);
+    line-height: 24px;
+}
+
+/** Body 2 Bold – 보조 본문 강조형 (예: 상품명 및 리스트) */
+.text-body-2-bold {
+    font-size:  var(--font-size-s);
+    font-weight: var(--font-weight-bold);
+    line-height: 20px;
+}
+
+/** Body 2 Regular – 보조 본문 일반 (예: 상품명 및 리스트) */
+.text-body-2-regular {
+    font-size:  var(--font-size-s);
+    font-weight: var(--font-weight-regular);
+    line-height: 20px;
+}
+
+/** * Detail Bold – 본문 보조 강조형 (예: 인팍스 타이틀 등) */
+.text-detail-bold {
+    font-size:  var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    line-height: 18px;
+}
+
+/** Detail Regular – 본문 보조 서브텍스트 (예: 인팍스 등) */
+.text-detail-regular {
+    font-size:  var(--font-size-xs);
+    font-weight: var(--font-weight-regular);
+    line-height: 18px;
+}

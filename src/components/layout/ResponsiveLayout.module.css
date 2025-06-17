@@ -1,0 +1,45 @@
+/* src/components/layout/layout.module.css */
+.container {
+    width: 100%;
+    margin: 0 auto; /* 가운데 정렬 */
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #f0f0f0; /* 예시 배경색 */
+}
+
+/* 기본 스타일 (모바일) */
+.container {
+    /* 모바일 화면에 맞는 스타일 */
+}
+
+/* 태블릿 화면 (예: 768px 이상) */
+@media (min-width: 768px) {
+    .container {
+        max-width: 720px; /* 태블릿 화면에서의 최대 너비 */
+        padding: 30px;
+        background-color: #e0e0e0; /* 태블릿 예시 배경색 */
+    }
+}
+
+/* 데스크탑 화면 (예: 1024px 이상) */
+@media (min-width: 1024px) {
+    .container {
+        max-width: 960px; /* 데스크탑 화면에서의 최대 너비 */
+        padding: 40px;
+        background-color: #d0d0d0; /* 데스크탑 예시 배경색 */
+    }
+}
+
+/* 더 큰 데스크탑 화면 (예: 1200px 이상) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* 매우 넓은 화면을 위한 추가 브레이크포인트 (선택 사항) */
+@media (min-width: 1440px) {
+    .container {
+        max-width: 1320px;
+    }
+}

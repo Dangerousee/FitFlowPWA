@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "baseUrl": "./src",
+    "incremental": true,
+    "paths": {
+      "@/*": ["*"], // baseUrl설정으로부터 시작하므로 ./src/*
+      "@lib/*": ["lib/*"], // './src/lib/*'
+      "@hooks/*": ["hooks/*"],
+      "@models/*": ["models/*"],
+      "@enums/*": ["enums/*"],
+      "@constants/*": ["constants/*"],
+      "@contexts/*": ["contexts/*"],
+      "@styles/*": ["styles/*"],
+      "@components/*": ["components/*"]
+    },
+    "types": ["jest", "node"]
+  },
+  "include": ["next-env.d.ts",
+    "src/models/**/*.d.ts", "**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}

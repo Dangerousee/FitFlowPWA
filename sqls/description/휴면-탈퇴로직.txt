@@ -1,0 +1,48 @@
+2. 휴면 회원 및 탈퇴 회원 관리
+휴면 회원과 탈퇴 회원을 관리하기 위해 public.users 테이블에 추가 컬럼을 두어 상태를 추적하고, 경우에 따라 별도의 테이블을 사용하는 방법을 고려할 수 있습니다.
+
+권장 방법: 상태 컬럼 추가 및 비활성화 플래그 활용
+
+가장 흔하게 사용되는 방법은 status 컬럼과 deactivated_at, withdrawal_at 같은 타임스탬프 컬럼을 추가하는 것입니다.
+
+SQL
+
+ALTER TABLE public.users
+ADD COLUMN status VARCHAR(50) NOT NULL DEFAULT 'active', -- 'active', 'dormant', 'withdrawn'
+ADD COLUMN deactivated_at TIMESTAMP WITH TIME ZONE,     -- 휴면 전환 시각
+ADD COLUMN withdrawal_at TIMESTAMP WITH TIME ZONE,      -- 탈퇴 처리 시각
+ADD COLUMN last_login_at TIMESTAMP WITH TIME ZONE;      -- 마지막 로그인 시각 (휴면 처리를 위해 활용)
+컬럼 설명:
+
+status (VARCHAR(50), NOT NULL, DEFAULT 'active'): 사용자의 현재 상태를 나타내는 핵심 컬럼입니다.
+'active': 정상 활동 중인 회원.
+'dormant': 휴면 회원. (예: 1년 이상 미접속)
+'withdrawn': 탈퇴 회원.
+이 컬럼은 서비스 내에서 사용자를 필터링하거나 UI를 변경할 때 주로 사용됩니다.
+last_login_at (TIMESTAMP WITH TIME ZONE): 사용자의 마지막 로그인 시각을 기록합니다. 이 정보를 기반으로 특정 기간(예: 1년) 동안 로그인하지 않은 회원을 dormant 상태로 전환할 수 있습니다.
+deactivated_at (TIMESTAMP WITH TIME ZONE): 사용자가 휴면 상태로 전환된 시각을 기록합니다. 휴면 해제 시 NULL로 다시 설정될 수 있습니다.
+withdrawal_at (TIMESTAMP WITH TIME ZONE): 사용자가 탈퇴 처리된 시각을 기록합니다.
+관리 로직 (서버 측 스케줄러 필요):
+
+휴면 전환 로직:
+
+백엔드 서버(Next.js API Route 또는 Cloud Functions)에서 주기적으로 실행되는 스케줄러를 만듭니다.
+이 스케줄러는 public.users 테이블을 조회하여 last_login_at이 특정 기간(예: 1년) 이상 경과했고, status가 'active'인 사용자들을 찾아냅니다.
+해당 사용자들의 status를 'dormant'로 업데이트하고, deactivated_at에 현재 시각을 기록합니다. 이메일 등으로 휴면 전환 알림을 보냅니다.
+주의: 휴면 회원으로 전환하더라도 사용자의 개인 정보는 법적 요건(예: 개인정보보호법)에 따라 일정 기간 보관해야 할 수 있습니다.
+휴면 해제 로직:
+
+휴면 회원이 로그인 시도를 하면, 로그인 성공 후 status를 다시 'active'로, deactivated_at을 NULL로, last_login_at을 현재 시각으로 업데이트합니다.
+탈퇴 처리 로직:
+
+사용자가 탈퇴를 요청하면, status를 'withdrawn'으로 업데이트하고, withdrawal_at에 현재 시각을 기록합니다.
+탈퇴 시 해당 사용자의 개인 정보(이메일, 닉네임, 프로필 이미지 등)는 서비스 정책 및 법적 요건에 따라 **마스킹(Masking)**하거나 삭제해야 합니다. (예: 이메일을 withdrawn_uuid@example.com 형태로 변경, 닉네임/프로필 이미지 NULL 처리).
+Firebase Auth에서도 해당 사용자를 삭제하는 것이 일반적입니다.
+데이터베이스 인덱스 추가:
+
+status 컬럼에 인덱스를 추가하면 상태별로 사용자 조회 시 성능 향상을 기대할 수 있습니다.
+SQL
+
+CREATE INDEX idx_users_status ON public.users(status);
+CREATE INDEX idx_users_last_login_at ON public.users(last_login_at);
+이러한 변경 사항을 통해 사용자의 편의성을 높이고, 서비스 정책에 따른 회원 관리를 효율적으로 수행할 수 있습니다.

@@ -4,6 +4,12 @@
 /node_modules
 /.pnp
 .pnp.js
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 # testing
 /coverage
@@ -23,10 +29,14 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 
 # local env files
-.env*.local
+.env.local
 .env
+
+# env files (can opt-in for committing if needed)
+.env*
 
 # vercel
 .vercel
@@ -34,3 +44,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# WebStorm 설정 관련 폴더 및 파일
+.idea/            # 프로젝트 설정 폴더 (자동 생성됨)
+*.iml             # IntelliJ 기반 프로젝트 설정 파일
+out/              # 빌드 출력 폴더
+node_modules/     # npm 패키지 폴더 (보통 무시함)
+dist/             # 번들된 결과물 폴더
+.env              # 환경 변수 파일 (민감 정보 포함 가능)
+.DS_Store         # macOS 시스템 파일
+Thumbs.db         # Windows 탐색기 캐시 파일

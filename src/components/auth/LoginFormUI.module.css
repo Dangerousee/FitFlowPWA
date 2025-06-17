@@ -1,0 +1,60 @@
+/* src/styles/LoginFormUI.module.css */
+.formContainer {
+    padding: 20px;
+    max-width: 400px;
+    margin: 50px auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.errorText {
+    color: red;
+    margin-bottom: 10px; /* 에러 메시지 하단에도 약간의 여백 추가 */
+}
+
+.label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.inputField {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    box-sizing: border-box; /* padding과 border가 width에 포함되도록 */
+}
+
+.inputFieldPassword { /* 비밀번호 필드에만 추가 여백이 필요하다면 별도 클래스 */
+    composes: inputField; /* inputField 스타일 상속 */
+    margin-bottom: 20px;
+}
+
+.button {
+    width: 100%;
+    padding: 10px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.loginButton {
+    composes: button; /* button 스타일 상속 */
+    background-color: #0070f3;
+}
+
+.registerButton {
+    composes: button; /* button 스타일 상속 */
+    background-color: #28a745;
+    margin-bottom: 0; /* 마지막 버튼이므로 하단 여백 제거 */
+}
+
+.button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}

@@ -1,0 +1,35 @@
+
+.container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+}
+
+.buttonContainer {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    flex-shrink: 0; /* 버튼 컨테이너의 크기가 줄어들지 않도록 보장 */
+}
+
+.inputRow {
+    display: flex;
+    flex-direction: column;
+    width: 100%; /* inputRow가 .container의 전체 너비를 차지하도록 */
+}
+
+.label {
+    display: block;
+}
+
+.inputField {
+    width: 100%;
+    border-radius: 4px;
+}
+
+.errorText {
+    color: red;
+}

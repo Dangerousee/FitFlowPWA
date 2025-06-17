@@ -1,0 +1,122 @@
+user_exercises 및 관련 테이블 설계 제안
+요청하신 사용자 운동 프로그램 설계 기능을 위한 데이터베이스 테이블 구조를 제안합니다. 사용자의 운동 프로그램 생성, 관리, 그리고 공유 및 사용 통계를 고려하여 설계했습니다.
+
+1. user_programs 테이블 (사용자 운동 프로그램 정의)
+사용자가 만드는 운동 프로그램의 메타성 정보를 저장하는 테이블입니다.
+
+id (PK, UUID/INT8): 운동 프로그램의 고유 ID. (UUID를 추천합니다. 나중에 public 공유 시 예측 불가능한 URL 생성에 용이하고, 분산 환경에서도 충돌 위험이 적습니다.)
+user_id (FK to users.id): 이 프로그램을 만든 사용자 ID.
+title (VARCHAR(255), NOT NULL): 운동 프로그램 제목 (예: "초급 가슴/삼두 루틴", "여름 대비 전신 버닝").
+description (TEXT): 프로그램에 대한 간단한 설명.
+is_public (BOOLEAN, DEFAULT FALSE): 이 프로그램이 다른 사용자에게 공개될 수 있는지 여부.
+view_count (INT, DEFAULT 0): 이 프로그램이 조회된 횟수 (public 프로그램 한정).
+use_count (INT, DEFAULT 0): 이 프로그램이 다른 사용자에 의해 '내 프로그램'으로 복제되어 사용된 횟수.
+created_at (TIMESTAMP WITH TIME ZONE, DEFAULT NOW()): 프로그램 생성 시각.
+updated_at (TIMESTAMP WITH TIME ZONE, DEFAULT NOW()): 프로그램 마지막 업데이트 시각.
+2. program_exercises 테이블 (운동 프로그램별 운동 목록)
+user_programs 테이블의 각 프로그램이 어떤 운동들로 구성되어 있는지, 그리고 각 운동의 기본 설정(sets, reps, weight)을 정의하는 테이블입니다.
+
+id (PK, UUID/INT8): 프로그램 운동 레코드의 고유 ID.
+program_id (FK to user_programs.id, NOT NULL): 이 운동이 속한 프로그램 ID.
+exercise_id (FK to exercises.id, NOT NULL): 선택된 운동의 ID (이전 단계에서 설계된 exercises 테이블 참조).
+order_in_program (INT, NOT NULL): 프로그램 내에서 운동의 순서 (예: 1, 2, 3...).
+default_sets (INT, NOT NULL): 이 운동의 기본 세트 수.
+default_reps (JSONB):
+각 세트별 반복 횟수 저장: [10, 8, 6] (3세트, 10, 8, 6회)
+고정 반복 횟수: 10 또는 [10] (모든 세트 10회)
+텍스트 설명 (옵션): "8-12 reps"
+사용자가 자유롭게 설정할 수 있도록 유연한 JSONB 타입이 적합합니다.
+default_weight (JSONB):
+각 세트별 무게 저장: [60.0, 70.0, 80.0] (3세트, 60kg, 70kg, 80kg)
+고정 무게: 60.0 또는 [60.0]
+텍스트 설명 (옵션): "RM 70%"
+default_reps와 동일하게 유연한 JSONB 타입을 추천합니다.
+rest_time_seconds (INT): 세트 간 기본 휴식 시간 (초).
+notes (TEXT): 이 운동에 대한 프로그램 작성자의 추가 메모.
+3. user_program_instances 테이블 (사용자 프로그램 실제 수행 기록)
+user_programs 테이블에 정의된 메타성 프로그램을 기반으로, 사용자가 실제로 운동을 수행한 기록을 저장하는 테이블입니다.
+
+id (PK, UUID/INT8): 실제 운동 수행 기록의 고유 ID.
+program_id (FK to user_programs.id, NOT NULL): 이 수행 기록이 참조하는 원본 프로그램 ID. (NULL 허용 시, 즉흥적인 운동 기록도 가능)
+user_id (FK to users.id, NOT NULL): 이 운동을 수행한 사용자 ID.
+start_time (TIMESTAMP WITH TIME ZONE, NOT NULL): 운동 시작 시각.
+end_time (TIMESTAMP WITH TIME ZONE): 운동 종료 시각.
+total_duration_seconds (INT): 총 운동 소요 시간 (초).
+status (VARCHAR(50), DEFAULT 'completed'): 운동 수행 상태 (예: 'completed', 'in_progress', 'abandoned').
+notes (TEXT): 해당 운동 세션에 대한 사용자의 전반적인 기록.
+4. exercise_records 테이블 (각 운동 세트별 상세 기록)
+user_program_instances의 하위 개념으로, 특정 운동 세션 내에서 각 운동의 세트별 상세 기록을 저장하는 테이블입니다.
+
+id (PK, UUID/INT8): 각 세트 기록의 고유 ID.
+instance_id (FK to user_program_instances.id, NOT NULL): 이 세트 기록이 속한 운동 세션 ID.
+program_exercise_id (FK to program_exercises.id): 이 기록이 참조하는 program_exercises의 ID. (NULL 허용 시, 즉흥적인 운동 기록도 가능)
+exercise_id (FK to exercises.id, NOT NULL): 이 기록에 해당하는 운동의 ID. (program_exercise_id가 NULL일 경우 필수)
+set_number (INT, NOT NULL): 몇 번째 세트인지 (예: 1, 2, 3).
+reps (INT): 실제 수행한 반복 횟수.
+weight (NUMERIC(7,2)): 실제 수행한 무게 (소수점 포함 가능).
+is_completed (BOOLEAN, DEFAULT FALSE): 이 세트가 완료되었는지 여부.
+notes (TEXT): 이 세트에 대한 사용자 메모 (예: "마지막 세트 힘들어", "PR 달성!").
+recorded_at (TIMESTAMP WITH TIME ZONE, DEFAULT NOW()): 이 세트가 기록된 시각.
+5. program_shares 테이블 (선택 사항: 복제된 프로그램의 원본 추적)
+나중에 다른 사람들이 특정 프로그램을 복제했을 때, 그 프로그램이 어떤 원본에서 시작되었는지 추적하고 싶을 경우 사용할 수 있는 테이블입니다. use_count는 user_programs에 직접 카운트하고, 이 테이블은 특정 복제 행위를 기록하는 용도입니다.
+
+id (PK, UUID/INT8): 공유 기록의 고유 ID.
+original_program_id (FK to user_programs.id, NOT NULL): 원본 프로그램 ID.
+copied_program_id (FK to user_programs.id, NOT NULL): 복사된 프로그램 ID.
+copied_by_user_id (FK to users.id, NOT NULL): 복사한 사용자 ID.
+copied_at (TIMESTAMP WITH TIME ZONE, DEFAULT NOW()): 복사 시각.
+테이블 관계 요약
++---------------+        +-------------------+        +---------------------------+        +-----------------+
+| users         |<-------| user_programs     |        | user_program_instances    |        | exercises       |
+| - id          |        | - id              |<-------| - id                      |        | - id            |
+| - username    |        | - user_id         |        | - program_id              |<-------| - exerciseName  |
+| ...           |        | - title           |        | - user_id                 |        | ...             |
++---------------+        | - is_public       |        | - start_time              |        +-----------------+
+                         | - view_count      |        | - end_time                |
+                         | - use_count       |        | ...                       |
+                         | ...               |        +---------------------------+
+                         +-------------------+                      ^
+                                   ^                                |
+                                   |                                |
+                                   |                                |
+                                   |                                |
+             +---------------------+-------------------+            |
+             | program_exercises   |                   |            |
+             | - id                |                   |            |
+             | - program_id        |-------------------|------------+
+             | - exercise_id       |                   |
+             | - order_in_program  |                   |
+             | - default_sets      |                   |
+             | - default_reps (JSONB) <----------------+-----------+
+             | - default_weight (JSONB)                 |           |
+             | ...                 |                   |           |
+             +---------------------+                   |           |
+                                   |                   |           |
+                                   |                   |           |
+                                   |                   |           |
+                                   |                   |           |
+                                   +-------------------+-----------+
+                                   | exercise_records  |
+                                   | - id              |
+                                   | - instance_id     |
+                                   | - program_exercise_id |
+                                   | - exercise_id     |
+                                   | - set_number      |
+                                   | - reps            |
+                                   | - weight          |
+                                   | ...               |
+                                   +-------------------+
+각 항목에 대한 상세 설계 반영
+운동 프로그램 제목 설정: user_programs.title
+운동 목록 중 선택: program_exercises.exercise_id (기존 exercises 테이블 참조)
+sets, reps, weight 설정:
+program_exercises.default_sets, program_exercises.default_reps, program_exercises.default_weight (프로그램 생성 시 기본 설정)
+각 세트별로 reps와 weight가 다를 수 있음: default_reps와 default_weight를 JSONB 타입으로 설정하여 [10, 8, 6] 또는 [60.0, 70.0, 80.0]과 같이 배열 형태로 저장할 수 있도록 했습니다.
+저장: 위 테이블들에 데이터를 삽입하여 프로그램 정의와 운동 기록을 저장합니다.
+만들어진 운동 프로그램은 메타성이고 실제 수행하는 테이블이 필요함:
+메타성: user_programs 및 program_exercises
+실제 수행: user_program_instances 및 exercise_records
+나중에 다른 사람들에게 public으로 공개할 수 있음: user_programs.is_public 플래그로 제어합니다.
+몇 명의 사람이 해당 프로그램을 자신의 운동 프로그램으로 사용할 수 있음: user_programs.use_count로 집계하며, program_shares 테이블을 통해 개별 복제 이력을 추적할 수 있습니다.
+몇 명의 사람들이 view를 했는지 알 수 있음: user_programs.view_count로 집계합니다.
+이 설계는 유연성과 확장성을 고려했으며, Supabase의 PostgreSQL 데이터베이스와 jsonb 타입 기능을 효과적으로 활용할 수 있습니다.

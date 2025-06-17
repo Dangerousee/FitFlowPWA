@@ -1,0 +1,21 @@
+{
+  "name": "FitFlow: 피트니스 플래너 & 트래커",
+  "short_name": "FitFlow",
+  "description": "운동 계획부터 기록까지, 당신의 피트니스 흐름을 관리하는 올인원 웹 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F7F4",
+  "theme_color": "#3B82F6",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
