@@ -1,19 +1,41 @@
-import {
+import Document, {
   Html,
   Head,
   Main,
   NextScript,
   DocumentContext,
-  DocumentInitialProps,
+  DocumentInitialProps, // DocumentInitialProps import 추가
 } from 'next/document';
-import Document from 'next/document';
+import { ServerStyleSheet } from 'styled-components';
+import type { AppProps, AppType } from 'next/app'; // AppType 및 AppProps import 추가
 
 class MyDocument extends Document {
-  static async getInitialProps(
-    ctx: DocumentContext
-  ): Promise<DocumentInitialProps> {
-    const initialProps = await Document.getInitialProps(ctx);
-    return { ...initialProps };
+  static async getInitialProps(ctx: DocumentContext): Promise<DocumentInitialProps> {
+    const sheet = new ServerStyleSheet();
+    const originalRenderPage = ctx.renderPage;
+
+    try {
+      ctx.renderPage = () =>
+        originalRenderPage({
+          enhanceApp:
+            (App: AppType) =>
+              (props: AppProps,) =>
+                sheet.collectStyles(<App {...props} />),
+        });
+
+      const initialProps = await Document.getInitialProps(ctx);
+      return {
+        ...initialProps,
+        styles: (
+          <>
+            {initialProps.styles}
+            {sheet.getStyleElement()}
+          </>
+        ),
+      };
+    } finally {
+      sheet.seal();
+    }
   }
 
   render() {
@@ -21,13 +43,12 @@ class MyDocument extends Document {
       <Html lang="ko">
         <Head>
           <link rel="manifest" href="/manifest.json" />
-          <link rel="apple-touch-icon" href="/apple-touch-icon.png"></link>
+          <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
           <meta name="theme-color" content="#000000" />
-          {/*<meta name="viewport" content="width=device-width, initial-scale=1" />*/}
         </Head>
         <body>
-        <Main />
-        <NextScript />
+          <Main />
+          <NextScript />
         </body>
       </Html>
     );
