@@ -6,3 +6,9 @@ export enum UserAccountStatus {
   DORMANT = 'dormant',    // 휴면 상태 (장기 미접속으로 일시적인 비활성 상태)
   WITHDRAWN = 'withdrawn',// 탈퇴 상태
 }
+
+export enum SnsProviderType {
+  KAKAO = 'kakao',
+  NAVER = 'naver',
+  GOOGLE = 'google',
+}

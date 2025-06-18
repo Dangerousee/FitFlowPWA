@@ -1,181 +1,247 @@
 import { FaGoogle, FaRegEnvelope, FaComment } from 'react-icons/fa';
 import { auth, googleProvider, signInWithPopup } from '@lib/firebase';
 import { useEffect, useRef, useCallback } from 'react';
+import { SnsProviderType } from '@enums/auth';
+import { SupabaseUserModel } from '@models/user.model';
+
+interface SnsAuthProps {
+  provider: SnsProviderType,
+  url: string,
+  state?: string,
+  onSuccess?: (code: string, state?: string | undefined) => void,
+  onError?: (err: string | undefined) => void
+}
+
+interface AuthResponse {
+  accessToken: string;
+}
 
 export default function SnsFormUI() {
-    const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
+  // 메시지 핸들러 참조 저장
+  const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
 
-    const removePreviousMessageHandler = useCallback(() => {
-        if (messageHandlerRef.current) {
-            window.removeEventListener('message', messageHandlerRef.current);
-            messageHandlerRef.current = null;
+  // 1️⃣ 인증 단계 (SNS 로그인 후 액세스 토큰 받기)
+  const authenticateUser = async (provider: SnsProviderType, code: string, state?: string): Promise<AuthResponse | null> => {
+    const tokenUrl = provider === SnsProviderType.KAKAO ? "/api/auth/kakao-auth" : "/api/auth/naver-auth";
+    const tokenBody = provider === SnsProviderType.KAKAO ? { code } : { code, state };
+
+    const accessToken = await fetchToken(tokenUrl, tokenBody);
+    return accessToken ? { accessToken } : null;
+  };
+
+// 2️⃣ 사용자 정보 가져오기 (SNS API 이용)
+  const fetchUserData = async (provider: SnsProviderType, accessToken: string): Promise<SupabaseUserModel | null> => {
+    const userUrl = provider === SnsProviderType.KAKAO ? "/api/auth/kakao-user" : "/api/auth/naver-user";
+    return await fetchUserInfo(userUrl, accessToken, provider);
+  };
+
+// 3️⃣ 회원 가입 (SNS 사용자 데이터를 내부 회원 데이터로 변환)
+  const registerUser = async (userData: SupabaseUserModel) => {
+    const response = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userData),
+    });
+
+    const result = await response.json();
+    return response.ok ? result : null;
+  };
+
+// 4️⃣ 로그인 → 회원 정보 조회 → 회원 가입 진행
+  const handleLogin = async (provider: SnsProviderType, code: string, state?: string) => {
+    const authResponse = await authenticateUser(provider, code, state);
+    if (!authResponse) {
+      console.error("SNS 인증 실패");
+      return;
+    }
+
+    const userData = await fetchUserData(provider, authResponse.accessToken);
+    if (!userData) {
+      console.error("사용자 정보 가져오기 실패");
+      return;
+    }
+
+    const registerResponse = await registerUser(userData);
+    if (registerResponse) {
+      console.log("회원 가입 성공:", registerResponse);
+    } else {
+      console.error("회원 가입 실패");
+    }
+  };
+
+// ✅ 회원가입 시 호출
+  const handleNaverSignup = (code: string, state: string) => handleLogin(SnsProviderType.NAVER, code, state);
+  const handleKakaoSignup = (code: string) => handleLogin(SnsProviderType.KAKAO, code);
+
+
+  // 기존 메시지 핸들러 제거 함수
+  // - `window.removeEventListener`를 호출하여 이전 핸들러 삭제
+  // - `messageHandlerRef.current`를 null로 초기화하여 중복 실행 방지
+  const removePreviousMessageHandler = useCallback(() => {
+    if (messageHandlerRef.current) {
+      window.removeEventListener("message", messageHandlerRef.current);
+      messageHandlerRef.current = null;
+    }
+  }, []);
+
+  // 컴포넌트가 언마운트될 때 메시지 핸들러 제거
+  useEffect(() => {
+    return () => {
+      removePreviousMessageHandler();
+    };
+  }, [removePreviousMessageHandler]);
+
+  // 로그인 공통 핸들러
+  // - provider(kakao, naver)에 따라 로그인 URL을 생성하고 팝업창을 열어 OAuth 인증 수행
+  // - `window.addEventListener`를 사용해 로그인 완료 후 메시지를 수신
+  // - 네이버의 경우, CSRF 방지를 위해 `state` 검증 수행
+  const handleAuth = (snsAuthProps: SnsAuthProps) => {
+    const { provider, url, state, onSuccess, onError } = snsAuthProps;
+    removePreviousMessageHandler(); // 중복 방지
+
+    window.open(url, "_blank", "width=600,height=800"); // 로그인 팝업 열기
+
+    const newMessageHandler = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return; // 보안상 출처 검증
+      console.log(`${provider} 로그인 메시지 수신:`, event.data);
+
+      // 이전 핸들러가 존재하면 제거하여 중복 실행 방지
+      if (messageHandlerRef.current) {
+        window.removeEventListener("message", messageHandlerRef.current);
+        messageHandlerRef.current = null;
+      }
+
+      // 로그인 실패 시 리턴 처리
+      if (!event.data.success) {
+        onError?.(`${provider} 로그인 실패: ${event.data.error}`);
+        return;
+      }
+      // 로그인 성공 시 인증 코드 처리
+      if (provider === SnsProviderType.NAVER) {
+        const { code, state: receivedState } = event.data;
+        if (state && state !== receivedState) { // CSRF 공격 방지 검증
+          onError?.("네이버 로그인 실패: state 값이 일치하지 않습니다.");
+          return;
         }
-    }, []);
-
-    useEffect(() => {
-        return () => {
-            removePreviousMessageHandler();
-        };
-    }, [removePreviousMessageHandler]);
-
-    const handleGoogleLogin = async () => {
-        try {
-            const result = await signInWithPopup(auth, googleProvider);
-            const userInfo = result.user;
-            console.log('Google 로그인 성공:', userInfo);
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            console.error('Google 로그인 오류:', message);
-        }
+        console.log("네이버 로그인 성공, 코드:", code);
+        onSuccess?.(code, receivedState); // 네이버 사용자 정보 요청
+      } else {
+        console.log("카카오 로그인 성공, 코드:", event.data.code);
+        onSuccess?.(event.data.code); // 카카오 사용자 정보 요청
+      }
     };
 
-    const getKakaoUser = async (code: string) => {
-        if (!code) return;
-        try {
-            // 1. 액세스 토큰 요청
-            const tokenResponse = await fetch('/api/auth/kakao-auth', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code }),
-            });
-            const tokenData = await tokenResponse.json();
-            console.log("카카오 토큰 응답:", { tokenData });
+    // 새로운 메시지 핸들러 등록
+    messageHandlerRef.current = newMessageHandler;
+    window.addEventListener("message", newMessageHandler);
+  };
 
-            if (tokenData.access_token) {
-                localStorage.setItem('kakao_token', tokenData.access_token);
+  // 카카오 로그인
+  const handleKakaoLogin = () => {
+    const clientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID;
+    const redirectUri = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
+    const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`;
+    handleAuth({
+      provider: SnsProviderType.KAKAO,
+      url: kakaoLoginUrl,
+      onSuccess: (code: string) => {
+        getKakaoUser(code);
+      },
+      onError: (err: string | undefined) => {
+        console.error("카카오 로그인 실패:", err);
+      }
+    });
+  };
 
-                // 2. 액세스 토큰으로 사용자 정보 요청
-                const userResponse = await fetch('/api/auth/kakao-user', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ accessToken: tokenData.access_token }),
-                });
-                const userData = await userResponse.json();
+  // 네이버 로그인
+  const handleNaverLogin = () => {
+    const clientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID;
+    const callbackUrl = process.env.NEXT_PUBLIC_NAVER_REDIRECT_URI;
+    const state = Math.random().toString(36).substring(2);
+    const naverLoginUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${callbackUrl}&state=${state}`;
+    handleAuth({
+      provider: SnsProviderType.NAVER,
+      url: naverLoginUrl,
+      state: state,
+      onSuccess: (code: string) => {
+        getNaverUser(code, state);
+      },
+      onError: (err: string | undefined) => {
+        console.error("네이버 로그인 실패:", err);
+      }
+    });
+  };
 
-                if (userResponse.ok) {
-                    console.log('카카오 사용자 정보:', userData);
-                    // TODO: 로그인 성공 후 리디렉션 또는 UI 업데이트 (userData 사용)
-                } else {
-                    console.error('카카오 사용자 정보 요청 실패:', userData);
-                }
-            } else {
-                console.error('카카오 토큰 요청 실패:', tokenData);
-            }
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            console.error('카카오 API 요청 오류:', message);
-        }
-    };
+  // 구글 로그인
+  const handleGoogleLogin = async () => {
+      try {
+          const result = await signInWithPopup(auth, googleProvider);
+          const userInfo = result.user;
+          console.log('Google 로그인 성공:', userInfo);
+      } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          console.error('Google 로그인 오류:', message);
+      }
+  };
 
-    const getNaverUser = async (code: string, state: string) => {
-        if (!code || !state) return;
-        try {
-            // 1. 액세스 토큰 요청
-            const tokenResponse = await fetch('/api/auth/naver-auth', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code, state }),
-            });
-            const tokenData = await tokenResponse.json();
-            console.log("네이버 토큰 응답:", { tokenData });
+  const fetchToken = async (url: string, body: object) => {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
 
-            if (tokenData.access_token) {
-                localStorage.setItem('naver_token', tokenData.access_token);
+      const data = await response.json();
+      if (!data.access_token) {
+        console.error("토큰 요청 실패:", data);
+        return null;
+      }
+      return data.access_token;
+    } catch (error) {
+      console.error("토큰 요청 오류:", error instanceof Error ? error.message : String(error));
+      return null;
+    }
+  };
 
-                // 2. 액세스 토큰으로 사용자 정보 요청
-                const userResponse = await fetch('/api/auth/naver-user', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ accessToken: tokenData.access_token }),
-                });
-                const userData = await userResponse.json();
+  const fetchUserInfo = async (url: string, accessToken: string, provider: string) => {
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessToken }),
+      });
 
-                if (userResponse.ok) {
-                    console.log('네이버 사용자 정보:', userData);
-                    // TODO: 로그인 성공 후 리디렉션 또는 UI 업데이트 (userData 사용)
-                } else {
-                    console.error('네이버 사용자 정보 요청 실패:', userData);
-                }
-            } else {
-                console.error('네이버 토큰 요청 실패:', tokenData);
-            }
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            console.error('네이버 API 요청 오류:', message);
-        }
-    };
+      const data = await response.json();
+      if (!response.ok) {
+        console.error(`${provider} 사용자 정보 요청 실패:`, data);
+        return null;
+      }
 
-    const handleKakaoLogin = async () => {
-        removePreviousMessageHandler();
+      localStorage.setItem(`${provider}_token`, accessToken);
+      console.log(`${provider} 사용자 정보:`, data);
+      return data;
+    } catch (error) {
+      console.error(`${provider} API 요청 오류:`, error instanceof Error ? error.message : String(error));
+      return null;
+    }
+  };
 
-        const clientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID;
-        const redirectUri = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
-        const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`;
+  const getUser = async (provider: SnsProviderType, code: string, state?: string) => {
+    if (!code || (provider === SnsProviderType.NAVER && !state)) return;
 
-        window.open(kakaoLoginUrl, '_blank', 'width=600,height=800');
+    const tokenUrl = provider === SnsProviderType.KAKAO ? "/api/auth/kakao-auth" : "/api/auth/naver-auth";
+    const userUrl = provider === SnsProviderType.KAKAO ? "/api/auth/kakao-user" : "/api/auth/naver-user";
+    const tokenBody = provider === SnsProviderType.KAKAO ? { code } : { code, state };
 
-        const newMessageHandler = (event: MessageEvent) => {
-            if (event.origin !== window.location.origin) {
-                return;
-            }
-            console.log('카카오 로그인 메시지 수신:', event.data);
+    const accessToken = await fetchToken(tokenUrl, tokenBody);
+    if (!accessToken) return;
 
-            window.removeEventListener('message', newMessageHandler);
-            if (messageHandlerRef.current === newMessageHandler) {
-                messageHandlerRef.current = null;
-            }
+    await fetchUserInfo(userUrl, accessToken, provider);
+  };
 
-            if (event.data.success) {
-                console.log('카카오 로그인 성공 (postMessage), 코드:', event.data.code);
-                getKakaoUser(event.data.code);
-            } else {
-                console.error('카카오 로그인 실패 (postMessage):', event.data.error);
-            }
-        };
-
-        messageHandlerRef.current = newMessageHandler;
-        window.addEventListener('message', newMessageHandler);
-    };
-
-    const handleNaverLogin = () => {
-        removePreviousMessageHandler();
-
-        const clientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID;
-        const callbackUrl = process.env.NEXT_PUBLIC_NAVER_REDIRECT_URI;
-        // CSRF 방지를 위해 state 값은 매번 랜덤하게 생성하는 것이 좋습니다.
-        const state = Math.random().toString(36).substring(2);
-        const naverLoginUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${callbackUrl}&state=${state}`;
-
-        window.open(naverLoginUrl, '_blank', 'width=600,height=800');
-
-        const newMessageHandler = (event: MessageEvent) => {
-            if (event.origin !== window.location.origin) {
-                return;
-            }
-            console.log('네이버 로그인 메시지 수신:', event.data);
-
-            window.removeEventListener('message', newMessageHandler);
-            if (messageHandlerRef.current === newMessageHandler) {
-                messageHandlerRef.current = null;
-            }
-
-            if (event.data.success) {
-                const { code, state: receivedState } = event.data;
-                // CSRF 공격 방지를 위해 요청 시 사용한 state와 콜백으로 받은 state가 일치하는지 확인
-                if (state !== receivedState) {
-                    console.error('네이버 로그인 실패: state 값이 일치하지 않습니다.');
-                    return;
-                }
-                console.log('네이버 로그인 성공 (postMessage), 코드:', code, '상태:', receivedState);
-                getNaverUser(code, receivedState);
-            } else {
-                console.error('네이버 로그인 실패 (postMessage):', event.data.error);
-            }
-        };
-
-        messageHandlerRef.current = newMessageHandler;
-        window.addEventListener('message', newMessageHandler);
-    };
+  const getKakaoUser = async (code: string) => getUser(SnsProviderType.KAKAO, code);
+  const getNaverUser = async (code: string, state: string) => getUser(SnsProviderType.NAVER, code, state);
 
     return (
         <div
