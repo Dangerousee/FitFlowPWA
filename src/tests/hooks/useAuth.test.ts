@@ -1,5 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { LOGOUT_MESSAGES, useAuth } from '@hooks/useAuth';
+import { LOGOUT_MESSAGES, useLogin } from '@hooks/useLogin';
 
 // next/router 모킹
 const mockRouterPush = jest.fn();
@@ -44,7 +44,7 @@ describe('useAuth Hook', () => {
 
   it('초기 상태: authLoading은 false가 되고, localStorage 토큰 유무에 따라 isLoggedIn 상태 설정', async () => { // 테스트 설명 약간 수정
     localStorage.setItem(AUTH_TOKEN_KEY, 'test-token-value');
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useLogin());
 
     // authLoading의 초기값 true를 직접 확인하는 것은 useEffect의 즉각적인 실행으로 인해 불안정할 수 있음
     // console.log('Initial authLoading from test:', result.current.authLoading); // 디버깅용 로그
@@ -57,7 +57,7 @@ describe('useAuth Hook', () => {
   });
 
   it('초기 상태: localStorage에 토큰이 없으면 isLoggedIn은 false이고 authLoading은 false', async () => { // 테스트 설명 약간 수정
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useLogin());
 
     // console.log('Initial authLoading (no token) from test:', result.current.authLoading); // 디버깅용 로그
 
@@ -73,7 +73,7 @@ describe('useAuth Hook', () => {
       json: async () => ({ token: 'new-login-token' }),
     });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useLogin());
     // 초기 인증 확인 완료 대기
     await waitFor(() => expect(result.current.authLoading).toBe(false));
 
@@ -93,7 +93,7 @@ describe('useAuth Hook', () => {
       json: async () => ({ message: '로그인 정보 오류', code: 'INVALID_CREDENTIALS' }),
     });
 
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useLogin());
     await waitFor(() => expect(result.current.authLoading).toBe(false));
 
     await act(async () => {
@@ -109,7 +109,7 @@ describe('useAuth Hook', () => {
 
   it('handleLogout: isLoggedIn은 false, 토큰 제거, 지정된 URL로 이동', async () => {
     localStorage.setItem(AUTH_TOKEN_KEY, 'existing-token');
-    const { result } = renderHook(() => useAuth());
+    const { result } = renderHook(() => useLogin());
 
     // 훅이 초기화되고 로그인 상태를 인지할 때까지 대기
     await waitFor(() => {

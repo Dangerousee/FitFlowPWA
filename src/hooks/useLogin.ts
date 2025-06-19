@@ -1,67 +1,42 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAutoLogout } from './useAutoLogout';
 import { useRouter } from 'next/router';
+import {UseLoginResult} from "@models/auth.model";
 // import { useRouter } from 'next/router';
-
-export interface UseAuthResult {
-  email: string;
-  setEmail: (email: string) => void;
-  password: string;
-  setPassword: (password: string) => void;
-  username: string;
-  setUsername: (username: string) => void;
-  error: string | null;
-  loading: boolean;
-  isLoggedIn: boolean;
-  authLoading: boolean;
-  handleLogin: () => Promise<void>;
-  handleRegister: () => Promise<void>;
-  handleLogout: (destinationUrl?: string | null) => void;
-}
 
 const AUTH_TOKEN_KEY = 'fitflow_auth_token';
 
-// --- Helper Functions ---
-function generateUsername(email: string): string {
-  const prefix = email.split('@')[0];
-  const randomNumber = Math.floor(1000 + Math.random() * 9000);
-  return `${prefix}_${randomNumber}`;
-}
-
-// API 호출 및 에러 처리를 위한 헬퍼
-async function apiCall(url: string, options: RequestInit, successMessage: string) {
-  const response = await fetch(url, options);
-  const data = await response.json();
-
-  if (!response.ok) {
-    console.error(`${options.method} 로그인 실패 (서버 응답)::`, data);
-    const errorMessage = data.message || `로그인 중 오류 (HTTP ${response.status})`;
-    const errorCode = data.code ? ` (Code: ${data.code})` : '';
-    throw new Error(`${errorMessage}${errorCode}`);
-  }
-
-  console.log(successMessage, data);
-  return data;
-}
-
-export const LOGOUT_MESSAGES = {
+const LOGOUT_MESSAGES = {
   AUTO: '세션이 만료되어 자동으로 로그아웃되었습니다.',
   MANUAL: '수동으로 로그아웃되었습니다.',
 };
 
-export const ERROR_MESSAGES = {
+const ERROR_MESSAGES = {
   LOGIN_NETWORK: '로그인 중 네트워크 또는 응답 처리 오류: ',
-  REGISTER_NETWORK: '회원가입 중 네트워크 또는 응답 처리 오류: ',
 };
 
-
-export function useAuth(): UseAuthResult {
+/**
+ * - provider_id 기준 로그인 처리: SNS는 이메일보다 provider_id가 더 신뢰 가능
+ * → 로그인 처리 시 반드시 provider_type + provider_id 조합으로 식별
+ *
+ * - login_type === 'native'인 경우만 password 체크
+ * - SNS 가입자의 경우, password는 존재하지 않거나 무시되어야 함
+ * - 로그인 시 반드시 login_type 조건을 함께 검증해야 함:
+ * const user = await getUserByEmail(email);
+ *
+ * if (!user || user.login_type !== 'native') {
+ *   // 소셜 로그인 사용자는 이메일/비번 로그인 불가
+ *   throw new Error('비밀번호 로그인 대상이 아닙니다.');
+ * }
+ *
+ * // 비밀번호 비교 후 진행
+ */
+export function useLogin(): UseLoginResult {
   // const [email, setEmail] = useState<string>('');
   // const [password, setPassword] = useState<string>('');
   // const [username, setUsername] = useState<string>('');
   const [email, setEmail] = useState<string>('vocal2th@gmail.com');
   const [password, setPassword] = useState<string>('1234qwer');
-  const [username, setUsername] = useState<string>('이종원');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -107,15 +82,26 @@ export function useAuth(): UseAuthResult {
     setError(null);
     setLoading(true);
     try {
-      const data = await apiCall(
-        '/api/auth/login',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        },
-        '로그인 성공:'
-      );
+
+      const options = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      };
+
+      const response = await fetch('/api/auth/login', options);
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error(`${options.method} 로그인 실패 (서버 응답)::`, data);
+        const errorMessage = data.message || `로그인 중 오류 (HTTP ${response.status})`;
+        const errorCode = data.code ? ` (Code: ${data.code})` : '';
+        throw new Error(`${errorMessage}${errorCode}`);
+      }
+
+      // TODO 성공 처리
+      console.log('로그인 성공:', data);
+
       if (typeof window !== 'undefined') {
         localStorage.setItem(AUTH_TOKEN_KEY, data.token || 'dummy_token');
       }
@@ -131,32 +117,6 @@ export function useAuth(): UseAuthResult {
     }
   };
 
-  const handleRegister = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      await apiCall(
-        '/api/auth/register',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email,
-            password,
-            username: username || generateUsername(email),
-          }),
-        },
-        '회원 가입 성공:'
-      );
-      // Optionally, you might want to auto-login or redirect here
-    } catch (err: any) {
-      console.error('Register processing error:', err);
-      setError(ERROR_MESSAGES.REGISTER_NETWORK + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleLogout = (destinationUrl?: string | null) => {
     performActualLogout(LOGOUT_MESSAGES.MANUAL, destinationUrl);
   };
@@ -166,14 +126,11 @@ export function useAuth(): UseAuthResult {
     setEmail,
     password,
     setPassword,
-    username,
-    setUsername,
     error,
     loading,
     isLoggedIn,
     authLoading,
     handleLogin,
-    handleRegister,
     handleLogout,
   };
 }

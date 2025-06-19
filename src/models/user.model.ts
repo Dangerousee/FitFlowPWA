@@ -1,4 +1,4 @@
-import { UserAccountStatus } from '@enums/auth';
+import { LoginType, ProviderType, AccountStatus, UserPlanType, UserRole } from '@enums/auth';
 
 export interface SupabaseUserModel {
   /** 사용자의 고유 ID */
@@ -8,33 +8,39 @@ export interface SupabaseUserModel {
   /** 사용자 이메일 주소 (로그인 및 알림에 사용) */
   email: string;
   /** 계정 생성 일시 (ISO 8601 형식) */
-  created_at?: string;
-  /** 사용자의 구독 플랜 유형 */
-  plan_type: 'free' | 'premium' | 'pro';
-  /** 사용자의 역할 또는 권한 수준 */
-  role: 'user' | 'admin' | 'moderator';
+  createdAt?: string;
   /** 구독 시작일 (ISO 8601 형식), 구독하지 않은 경우 null */
-  subscription_start_date?: string | null;
+  subscriptionStartDate?: string | null;
   /** 구독 종료일 (ISO 8601 형식), 구독하지 않은 경우 null */
-  subscription_end_date?: string | null;
+  subscriptionEndDate?: string | null;
   /** 현재 구독이 활성 상태인지 여부 */
-  is_subscription_active?: boolean;
+  isSubscriptionActive?: boolean;
   /** 사용자 정보 최종 업데이트 일시 (ISO 8601 형식) */
-  update_at?: string | null;
+  updateAt?: string | null;
   /** 사용자의 별명 또는 표시 이름 */
   nickname?: string | null;
   /** 프로필 이미지 URL */
-  profile_image_url?: string | null;
-  /** 사용자의 현재 계정 상태 */
-  status: UserAccountStatus;
+  profileImageUrl?: string | null;
   /** 계정 비활성화 일시 (ISO 8601 형식) */
-  deactivated_at?: string | null;
+  deactivatedAt?: string | null;
   /** 계정 탈퇴(철회) 일시 (ISO 8601 형식) */
-  withdrawal_at?: string | null;
+  withdrawalAt?: string | null;
   /** 마지막 로그인 일시 (ISO 8601 형식) */
-  last_login_at?: string | null;
+  lastLoginAt?: string | null;
   /** 마지막 비밀번호 변경 일시 (ISO 8601 형식) */
-  password_last_changed_at?: string | null;
+  passwordLastChangedAt?: string | null;
+  /** Social platform type */
+  providerType: ProviderType | null;
+  /** Social platform 에서 제공되는 uuid */
+  providerId: string | null;
+  /** 로그인 유형(native | social) */
+  loginType: LoginType | null;
+  /** 사용자의 구독 플랜 유형 */
+  planType: UserPlanType;
+  /** 사용자의 역할 또는 권한 수준 */
+  userRole: UserRole;
+  /** 사용자의 현재 계정 상태 */
+  accountStatus: AccountStatus;
 };
 
 

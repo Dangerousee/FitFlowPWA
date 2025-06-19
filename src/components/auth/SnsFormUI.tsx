@@ -1,11 +1,11 @@
 import { FaGoogle, FaRegEnvelope, FaComment } from 'react-icons/fa';
 import { auth, googleProvider, signInWithPopup } from '@lib/firebase';
 import { useEffect, useRef, useCallback } from 'react';
-import { SnsProviderType } from '@enums/auth';
+import { ProviderType } from '@enums/auth';
 import { SupabaseUserModel } from '@models/user.model';
 
 interface SnsAuthProps {
-  provider: SnsProviderType,
+  provider: ProviderType,
   url: string,
   state?: string,
   onSuccess?: (code: string, state?: string | undefined) => void,
@@ -21,17 +21,17 @@ export default function SnsFormUI() {
   const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
 
   // 1️⃣ 인증 단계 (SNS 로그인 후 액세스 토큰 받기)
-  const authenticateUser = async (provider: SnsProviderType, code: string, state?: string): Promise<AuthResponse | null> => {
-    const tokenUrl = provider === SnsProviderType.KAKAO ? "/api/auth/kakao-auth" : "/api/auth/naver-auth";
-    const tokenBody = provider === SnsProviderType.KAKAO ? { code } : { code, state };
+  const authenticateUser = async (provider: ProviderType, code: string, state?: string): Promise<AuthResponse | null> => {
+    const tokenUrl = provider === ProviderType.KAKAO ? "/api/auth/kakao-auth" : "/api/auth/naver-auth";
+    const tokenBody = provider === ProviderType.KAKAO ? { code } : { code, state };
 
     const accessToken = await fetchToken(tokenUrl, tokenBody);
     return accessToken ? { accessToken } : null;
   };
 
 // 2️⃣ 사용자 정보 가져오기 (SNS API 이용)
-  const fetchUserData = async (provider: SnsProviderType, accessToken: string): Promise<SupabaseUserModel | null> => {
-    const userUrl = provider === SnsProviderType.KAKAO ? "/api/auth/kakao-user" : "/api/auth/naver-user";
+  const fetchUserData = async (provider: ProviderType, accessToken: string): Promise<SupabaseUserModel | null> => {
+    const userUrl = provider === ProviderType.KAKAO ? "/api/auth/kakao-user" : "/api/auth/naver-user";
     return await fetchUserInfo(userUrl, accessToken, provider);
   };
 
@@ -48,7 +48,7 @@ export default function SnsFormUI() {
   };
 
 // 4️⃣ 로그인 → 회원 정보 조회 → 회원 가입 진행
-  const handleLogin = async (provider: SnsProviderType, code: string, state?: string) => {
+  const handleLogin = async (provider: ProviderType, code: string, state?: string) => {
     const authResponse = await authenticateUser(provider, code, state);
     if (!authResponse) {
       console.error("SNS 인증 실패");
@@ -70,8 +70,8 @@ export default function SnsFormUI() {
   };
 
 // ✅ 회원가입 시 호출
-  const handleNaverSignup = (code: string, state: string) => handleLogin(SnsProviderType.NAVER, code, state);
-  const handleKakaoSignup = (code: string) => handleLogin(SnsProviderType.KAKAO, code);
+  const handleNaverSignup = (code: string, state: string) => handleLogin(ProviderType.NAVER, code, state);
+  const handleKakaoSignup = (code: string) => handleLogin(ProviderType.KAKAO, code);
 
 
   // 기존 메시지 핸들러 제거 함수
@@ -117,7 +117,7 @@ export default function SnsFormUI() {
         return;
       }
       // 로그인 성공 시 인증 코드 처리
-      if (provider === SnsProviderType.NAVER) {
+      if (provider === ProviderType.NAVER) {
         const { code, state: receivedState } = event.data;
         if (state && state !== receivedState) { // CSRF 공격 방지 검증
           onError?.("네이버 로그인 실패: state 값이 일치하지 않습니다.");
@@ -142,7 +142,7 @@ export default function SnsFormUI() {
     const redirectUri = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
     const kakaoLoginUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`;
     handleAuth({
-      provider: SnsProviderType.KAKAO,
+      provider: ProviderType.KAKAO,
       url: kakaoLoginUrl,
       onSuccess: (code: string) => {
         getKakaoUser(code);
@@ -160,7 +160,7 @@ export default function SnsFormUI() {
     const state = Math.random().toString(36).substring(2);
     const naverLoginUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${callbackUrl}&state=${state}`;
     handleAuth({
-      provider: SnsProviderType.NAVER,
+      provider: ProviderType.NAVER,
       url: naverLoginUrl,
       state: state,
       onSuccess: (code: string) => {
@@ -227,12 +227,12 @@ export default function SnsFormUI() {
     }
   };
 
-  const getUser = async (provider: SnsProviderType, code: string, state?: string) => {
-    if (!code || (provider === SnsProviderType.NAVER && !state)) return;
+  const getUser = async (provider: ProviderType, code: string, state?: string) => {
+    if (!code || (provider === ProviderType.NAVER && !state)) return;
 
-    const tokenUrl = provider === SnsProviderType.KAKAO ? "/api/auth/kakao-auth" : "/api/auth/naver-auth";
-    const userUrl = provider === SnsProviderType.KAKAO ? "/api/auth/kakao-user" : "/api/auth/naver-user";
-    const tokenBody = provider === SnsProviderType.KAKAO ? { code } : { code, state };
+    const tokenUrl = provider === ProviderType.KAKAO ? "/api/auth/kakao-auth" : "/api/auth/naver-auth";
+    const userUrl = provider === ProviderType.KAKAO ? "/api/auth/kakao-user" : "/api/auth/naver-user";
+    const tokenBody = provider === ProviderType.KAKAO ? { code } : { code, state };
 
     const accessToken = await fetchToken(tokenUrl, tokenBody);
     if (!accessToken) return;
@@ -240,8 +240,8 @@ export default function SnsFormUI() {
     await fetchUserInfo(userUrl, accessToken, provider);
   };
 
-  const getKakaoUser = async (code: string) => getUser(SnsProviderType.KAKAO, code);
-  const getNaverUser = async (code: string, state: string) => getUser(SnsProviderType.NAVER, code, state);
+  const getKakaoUser = async (code: string) => getUser(ProviderType.KAKAO, code);
+  const getNaverUser = async (code: string, state: string) => getUser(ProviderType.NAVER, code, state);
 
     return (
         <div
