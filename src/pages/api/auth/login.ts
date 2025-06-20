@@ -1,14 +1,10 @@
 // src/pages/api/auth/login_bak.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import * as ErrorCodes from '@constants/errorCodes';
-import { LoginRequestBody } from '@models/auth.model';
+import { NativeLoginRequestBody } from '@models/auth.model';
 
-import {
-  authenticateSupabaseUser,
-  checkUserAccountStatus,
-  checkPasswordPolicy,
-  updateUserLoginDetails
-} from '@lib/supabase/auth';
+import { authenticateSupabaseUser, checkPasswordPolicy, checkUserAccountStatus, updateUserLoginDetails } from '@lib/supabase/auth';
+import { LoginType } from '@enums/auth';
 
 export default async function handler(
   req: NextApiRequest,
@@ -18,7 +14,7 @@ export default async function handler(
     return res.status(405).json({ message: '허용되지 않는 메소드입니다.' });
   }
 
-  const { email, password } = req.body as LoginRequestBody;
+  const { email, password } = req.body as NativeLoginRequestBody;
 
   if (!password || !email) {
     return res
@@ -30,7 +26,11 @@ export default async function handler(
 
   try {
     // 1. 이메일과 비밀번호로 사용자 인증 (Supabase)
-    const userProfile = await authenticateSupabaseUser(email, password);
+    const userProfile = await authenticateSupabaseUser({
+      loginType: LoginType.NATIVE,
+      email,
+      password,
+    });
 
     const userId = userProfile.id;
 

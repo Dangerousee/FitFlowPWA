@@ -1,13 +1,26 @@
+import { LoginType, ProviderType } from '@enums/auth';
+
 export interface RegisterRequestBody {
   email: string;
   password: string;
   username: string;
 }
 
-export interface LoginRequestBody {
+export interface LoginRequestBodyType {
+  loginType: LoginType,
+}
+
+export interface NativeLoginRequestBody extends LoginRequestBodyType {
   email: string;
   password: string;
 }
+
+export interface SocialLoginRequestBody extends LoginRequestBodyType {
+  providerType: ProviderType,
+  providerId: string
+}
+
+export type LoginRequestBody = NativeLoginRequestBody | SocialLoginRequestBody;
 
 // 이메일 및 비밀번호 관련 상태와 setter를 포함하는 공통 필드
 export interface AuthFields {
