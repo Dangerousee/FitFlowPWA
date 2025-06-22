@@ -1,0 +1,1 @@
+// AuthFields, OptionalProfileFields 같은 공통 필드

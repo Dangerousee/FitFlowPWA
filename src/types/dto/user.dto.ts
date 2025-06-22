@@ -1,6 +1,6 @@
-import { LoginType, ProviderType, AccountStatus, UserPlanType, UserRole } from '@enums/auth';
+import { LoginType, ProviderType, AccountStatus, UserPlanType, UserRole } from '@enums';
 
-export interface SupabaseUserModel {
+export interface SupabaseUserDTO {
   /** 사용자의 고유 ID */
   id: string;
   /** 사용자 이름 (고유해야 함) */

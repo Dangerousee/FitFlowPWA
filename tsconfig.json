@@ -18,10 +18,13 @@
     "forceConsistentCasingInFileNames": false, // 파일 대소문자 체크 완화
     "paths": {
       "@/*": ["*"], // baseUrl설정으로부터 시작하므로 ./src/*
-      "@lib/*": ["lib/*"], // './src/lib/*'
+      "@lib": ["lib"],
+      "@lib/*": ["lib/*"],
       "@hooks/*": ["hooks/*"],
-      "@models/*": ["models/*"],
+      "@enums": ["enums/index.ts"],
       "@enums/*": ["enums/*"],
+      "@types": ["types"],
+      "@types/*": ["types/*"],
       "@constants/*": ["constants/*"],
       "@contexts/*": ["contexts/*"],
       "@styles/*": ["styles/*"],
@@ -29,7 +32,6 @@
     },
     "types": ["jest", "node"]
   },
-  "include": ["next-env.d.ts",
-    "src/models/**/*.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "src/types/**/*.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }

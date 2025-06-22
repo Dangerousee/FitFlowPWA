@@ -42,7 +42,7 @@ export interface TextFieldsProps {
 }
 
 // 디버깅 용
-const defaultHandleKeyDown = (event) => {
+const defaultHandleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
   switch (event.key) {
     case 'Enter':
       console.log('Enter key pressed!');
@@ -71,7 +71,7 @@ const defaultHandleKeyDown = (event) => {
 };
 
 // 전략 1: 숫자만 입력 허용 (최대 5자리)
-export const handleNumericBeforeChange = (newValue) => {
+export const handleNumericBeforeChange = (newValue: any) => {
   if (newValue === '') return true; // 비우는 것은 허용
   if (/^\d*$/.test(newValue) && newValue.length <= 5) {
     return true; // 숫자이고 5자리 이하이면 허용
@@ -80,7 +80,7 @@ export const handleNumericBeforeChange = (newValue) => {
 };
 
 // 전략 2: 최대 3자리까지만 입력 허용 (길이 초과 시 잘라내기)
-export const handleMaxLengthBeforeChange = (newValue) => {
+export const handleMaxLengthBeforeChange = (newValue: any) => {
   if (newValue.length > 3) {
     return newValue.substring(0, 3); // 3자리로 잘라서 반환 (변환)
   }
@@ -88,7 +88,7 @@ export const handleMaxLengthBeforeChange = (newValue) => {
 };
 
 // 전략 3: 입력값을 항상 대문자로 변환
-export const handleTransformToUpperBeforeChange = (newValue) => {
+export const handleTransformToUpperBeforeChange = (newValue: any) => {
   return newValue.toUpperCase(); // 대문자로 변환하여 반환
 };
 
@@ -96,7 +96,7 @@ export const handleTransformToUpperBeforeChange = (newValue) => {
 
 
 // 예시: 비동기 작업 (API 호출 등)
-export const handleValidateDateWithAsync = async (value, event) => {
+export const handleValidateDateWithAsync = async (value: any, event: any) => {
   const res = await new Promise((resolve) =>
     setTimeout(() => resolve(value), 200)
   );
@@ -131,7 +131,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldsProps>(
 
     const { onChange, onBeforeChange, ...eventHandlers } = onEventHandlers ?? {};
 
-    const internalHandleChange = async (event) => {
+    const internalHandleChange = async (event: any) => {
       const proposedValue = event.target.value;
       let finalValue = proposedValue;
       let allowUpdate = true;

@@ -1,66 +1,63 @@
-// src/pages/api/auth/login_bak.ts
+// src/pages/api/auth/login.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import * as ErrorCodes from '@constants/errorCodes';
-import { NativeLoginRequestBody } from '@models/auth.model';
+import {
+  authenticateSupabaseUser,
+  checkPasswordPolicy,
+  checkUserAccountStatus,
+  createRefreshSession,
+  updateUserLoginDetails,
+} from '@lib/auth';
+import { issueAccessToken, issueRefreshToken } from '@lib';
+import { LoginRequestDTO, LoginResponseDTO } from '@types';
+import { handleApiError } from '@lib/errors/handleApiError';
 
-import { authenticateSupabaseUser, checkPasswordPolicy, checkUserAccountStatus, updateUserLoginDetails } from '@lib/supabase/auth';
-import { LoginType } from '@enums/auth';
+function isBaseLoginRequest(value: any): boolean {
+  return value && typeof value === 'object' && 'loginType' in value;
+}
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: '허용되지 않는 메소드입니다.' });
   }
 
-  const { email, password } = req.body as NativeLoginRequestBody;
-
-  if (!password || !email) {
-    return res
-      .status(400)
-      .json({ message: '이메일 또는 비밀번호가 누락되었습니다.', code: ErrorCodes.MISSING_CREDENTIAL });
+  if (!isBaseLoginRequest(req.body)) {
+    return res.status(400).json({ message: '요청 바디가 유효하지 않습니다.' });
   }
 
+  const body = req.body as LoginRequestDTO;
   const operationTimestamp = new Date().toISOString();
 
   try {
-    // 1. 이메일과 비밀번호로 사용자 인증 (Supabase)
-    const userProfile = await authenticateSupabaseUser({
-      loginType: LoginType.NATIVE,
-      email,
-      password,
-    });
+    // 1. 사용자 인증
+    const user = await authenticateSupabaseUser(body);
 
-    const userId = userProfile.id;
+    // 2. 계정 상태 / 보안 정책 확인
+    await checkUserAccountStatus(user);
+    await checkPasswordPolicy(user);
 
-    // 2. 계정 상태 확인 (예: 휴면, 탈퇴)
-    await checkUserAccountStatus(userProfile);
+    // 3. 로그인 기록 업데이트
+    const updatedUser = await updateUserLoginDetails(user.id, operationTimestamp);
 
-    // 3. 비밀번호 정책 확인 (예: 만료일)
-    await checkPasswordPolicy(userProfile);
+    // 4. 토큰 발급
+    const accessToken = issueAccessToken(updatedUser);
+    const refreshToken = issueRefreshToken(updatedUser);
 
-    // 4. Supabase에 최종 로그인 시간 및 상태 업데이트
-    const updatedUserProfile = await updateUserLoginDetails(userId, operationTimestamp);
+    // 5. refresh 세션 저장
+    await createRefreshSession(updatedUser, refreshToken, req);
 
-    // 성공 응답
-    res.status(200).json({
-      data: updatedUserProfile, // 클라이언트에는 업데이트된 프로필 또는 초기 프로필 정보를 반환
-      message: '로그인에 성공했습니다.',
-    });
-  } catch (error: any) {
-    console.error('로그인 API 오류:', error);
-    const statusCode = error.statusCode || 500;
-    const responseBody: { message: string; code?: string; error?: string } = {
-      message: error.message || '내부 서버 오류가 발생했습니다.',
-    };
-    if (error.code) {
-      responseBody.code = error.code;
-    }
-    // 개발 환경에서는 디버깅을 위해 internalError를 포함할 수 있습니다.
-    if (process.env.NODE_ENV === 'development' && error.internalError) {
-      responseBody.error = error.internalError;
-    }
-    res.status(statusCode).json(responseBody);
+    // 6. HttpOnly 쿠키 설정
+    res.setHeader('Set-Cookie', [
+      `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=604800; SameSite=Strict`,
+    ]);
+
+    // 7. 응답 반환
+    return res.status(200).json({
+      user: updatedUser,
+      accessToken,
+    } satisfies LoginResponseDTO);
+  } catch (error) {
+    const { status, body } = handleApiError(error);
+    console.error('로그인 API 오류:', body);
+    return res.status(status).json(body);
   }
 }

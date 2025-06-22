@@ -1,25 +1,20 @@
 // src/pages/index.tsx
 import LoginFormUI from '@components/auth/LoginFormUI';
-import { useAuth } from '@/contexts/AuthContext';
+import { useLogin } from '@/contexts/AuthContext';
 import { useRouter } from 'next/router';
 import SnsFormUI from '@components/auth/SnsFormUI';
+import { useState } from 'react';
 
 export default function HomePage() {
+  const [email, setEmail] = useState<string>('vocal2th@gmail.com');
+  const [password, setPassword] = useState<string>('1234qwer');
+
   const {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    username,
-    setUsername,
     error,
     loading,
     isLoggedIn,
-    authLoading,
-    handleLogin,
-    handleRegister,
-    handleLogout,
-  } = useAuth();
+    handleNativeLogin,
+  } = useLogin();
   const router = useRouter();
 
   if (isLoggedIn) {
@@ -42,8 +37,8 @@ export default function HomePage() {
         onEmailChange={(e) => setEmail(e.target.value)}
         password={password}
         onPasswordChange={(e) => setPassword(e.target.value)}
-        onLogin={handleLogin}
-        onRegister={handleRegister}
+        onLogin={() => handleNativeLogin(email, password)}
+        // onRegister={handleRegister}
         loading={loading}
         error={error}
       />

@@ -1,8 +1,8 @@
-import { useAuth } from '@/contexts/AuthContext';
+import { useLogin } from '@/contexts/AuthContext';
 
 const HandleLogout = () => {
   // authLoading 상태 추가
-  const { handleLogout, isLoggedIn, email, authLoading } = useAuth();
+  const { handleLogout, isLoggedIn, authLoading } = useLogin();
 
   // 인증 상태 확인 중일 때 로딩 메시지 표시
   if (authLoading) {
@@ -15,7 +15,7 @@ const HandleLogout = () => {
 
   return (
     <div>
-      <p>환영합니다, {email}님!</p>
+      <p>환영합니다, TODO님!</p>
       <button onClick={() => handleLogout('/')}>로그아웃</button>
     </div>
   );

@@ -1,80 +1,72 @@
 /* src/styles/font-family.css */
 :root {
-    /* Naver NanumSquare 폰트 변수 선언 */
+    /* Naver NanumSquare 폰트 변수 */
     --font-nanum-square: 'NanumSquare', Arial, Helvetica, sans-serif;
-    /* Gmarket Sans 폰트 변수 선언 */
+    /* Gmarket Sans 폰트 변수 */
     --font-gmarket: 'GmarketSans', Arial, Helvetica, sans-serif;
     /* --font-roboto 변수는 next/font에 의해 자동으로 주입됩니다. */
-    --font-weight-default: 300; /* 기본 weight을 Regular(400)로 설정 (나눔스퀘어 기준) */
+    --font-weight-default: 400; /* 기본 weight를 Regular(400)로 설정 */
 }
 
-/* Naver NanumSquare Light */
+/* NanumSquare Light (300) */
 @font-face {
     font-family: 'NanumSquare';
-    src: url('/fonts/NanumSquare/OTF/NanumSquareL.otf') format('opentype'),
-    url('/fonts/NanumSquare/TTF/NanumSquareL.ttf') format('truetype');
-    font-weight: 300; /* Light */
+    src: url('/fonts/NanumSquare/WOFF/NanumSquareOTF_acL00.woff2') format('woff2');
+    font-weight: 300;
     font-style: normal;
     font-display: swap;
 }
 
-/* Naver NanumSquare Regular */
+/* NanumSquare Regular (400) */
 @font-face {
     font-family: 'NanumSquare';
-    src: url('/fonts/NanumSquare/OTF/NanumSquareR.otf') format('opentype'),
-    url('/fonts/NanumSquare/TTF/NanumSquareR.ttf') format('truetype');
-    font-weight: 400; /* Regular */
+    src: url('/fonts/NanumSquare/WOFF/NanumSquareOTF_acR00.woff2') format('woff2');
+    font-weight: 400;
     font-style: normal;
     font-display: swap;
 }
 
-/* Naver NanumSquare Bold */
+/* NanumSquare Bold (700) */
 @font-face {
     font-family: 'NanumSquare';
-    src: url('/fonts/NanumSquare/OTF/NanumSquareN.otf') format('opentype'),
-    url('/fonts/NanumSquare/TTF/NanumSquareN.ttf') format('truetype');
-    font-weight: 700; /* Bold */
+    src: url('/fonts/NanumSquare/WOFF/NanumSquareOTF_acB00.woff2') format('woff2');
+    font-weight: 700;
     font-style: normal;
     font-display: swap;
 }
 
-/* Naver NanumSquare ExtraBold */
+/* NanumSquare ExtraBold (800) */
 @font-face {
     font-family: 'NanumSquare';
-    src: url('/fonts/NanumSquare/OTF/NanumSquareEB.otf') format('opentype'),
-    url('/fonts/NanumSquare/TTF/NanumSquareEB.ttf') format('truetype');
-    font-weight: 800; /* ExtraBold */
+    src: url('/fonts/NanumSquare/WOFF/NanumSquareOTF_acEB00.woff2') format('woff2');
+    font-weight: 800;
     font-style: normal;
     font-display: swap;
 }
 
-
-/* Gmarket Sans Light */
+/* GmarketSans Light */
 @font-face {
     font-family: 'GmarketSans';
-    src: url('/fonts/GmarketSans/OTF/GmarketSansLight.otf') format('opentype'),
-    url('/fonts/GmarketSans/TTF/GmarketSansTTFLight.ttf') format('truetype');
-    font-weight: 300; /* Light */
+    src: url('/fonts/GmarketSans/WOFF/GmarketSansLight.woff2') format('woff2');
+    font-weight: 300;
     font-style: normal;
     font-display: swap;
 }
 
-/* Gmarket Sans Medium */
+/* GmarketSans Medium */
 @font-face {
     font-family: 'GmarketSans';
-    src: url('/fonts/GmarketSans/OTF/GmarketSansMedium.otf') format('opentype'),
-    url('/fonts/GmarketSans/TTF/GmarketSansTTFMedium.ttf') format('truetype');
-    font-weight: 500; /* Medium */
+    src: url('/fonts/GmarketSans/WOFF/GmarketSansMedium.woff2') format('woff2');
+    font-weight: 500;
     font-style: normal;
     font-display: swap;
 }
 
-/* Gmarket Sans Bold */
+/* GmarketSans Bold */
 @font-face {
     font-family: 'GmarketSans';
-    src: url('/fonts/GmarketSans/OTF/GmarketSansBold.otf') format('opentype'),
-    url('/fonts/GmarketSans/TTF/GmarketSansTTFBold.ttf') format('truetype');
-    font-weight: 700; /* Bold */
+    src: url('/fonts/GmarketSans/WOFF/GmarketSansBold.woff2') format('woff2');
+    font-weight: 700;
     font-style: normal;
     font-display: swap;
 }

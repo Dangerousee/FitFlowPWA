@@ -1,7 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAutoLogout } from './useAutoLogout';
 import { useRouter } from 'next/router';
-import {UseLoginResult} from "@models/auth.model";
+import { UseLoginResult } from "@/types/auth/hooks";
+import { LoginType, ProviderType } from '@enums';
+import { LoginRequestDTO } from '@types';
+import { parseApiError } from '@lib';
 // import { useRouter } from 'next/router';
 
 const AUTH_TOKEN_KEY = 'fitflow_auth_token';
@@ -32,11 +35,6 @@ const ERROR_MESSAGES = {
  * // 비밀번호 비교 후 진행
  */
 export function useLogin(): UseLoginResult {
-  // const [email, setEmail] = useState<string>('');
-  // const [password, setPassword] = useState<string>('');
-  // const [username, setUsername] = useState<string>('');
-  const [email, setEmail] = useState<string>('vocal2th@gmail.com');
-  const [password, setPassword] = useState<string>('1234qwer');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -78,7 +76,14 @@ export function useLogin(): UseLoginResult {
     }
   };
 
-  const handleLogin = async () => {
+  const handleNativeLogin = async (email: string, password: string) => {
+    return handleLogin({ email, password, loginType: LoginType.NATIVE });
+  };
+  const handleSocialLogin = async (providerType: ProviderType, providerId: string) => {
+    return handleLogin({ providerType, providerId, loginType: LoginType.SOCIAL });
+  };
+
+  const handleLogin = async (param: LoginRequestDTO) => {
     setError(null);
     setLoading(true);
     try {
@@ -86,7 +91,7 @@ export function useLogin(): UseLoginResult {
       const options = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(param),
       };
 
       const response = await fetch('/api/auth/login', options);
@@ -94,19 +99,18 @@ export function useLogin(): UseLoginResult {
 
       if (!response.ok) {
         console.error(`${options.method} 로그인 실패 (서버 응답)::`, data);
-        const errorMessage = data.message || `로그인 중 오류 (HTTP ${response.status})`;
-        const errorCode = data.code ? ` (Code: ${data.code})` : '';
-        throw new Error(`${errorMessage}${errorCode}`);
+        throw parseApiError(response, data);
       }
 
-      // TODO 성공 처리
       console.log('로그인 성공:', data);
 
       if (typeof window !== 'undefined') {
-        localStorage.setItem(AUTH_TOKEN_KEY, data.token || 'dummy_token');
+        localStorage.setItem(AUTH_TOKEN_KEY, data.accessToken || 'dummy_token');
       }
       setIsLoggedIn(true); // 로그인 성공 시 상태 업데이트
       setError(null); // 이전 에러 메시지 클리어
+
+      return response;
     } catch (err: any) {
       console.error('Login processing error:', err);
       clearAuthErrorAndState(); // 토큰 제거 및 에러 상태 초기화
@@ -122,15 +126,13 @@ export function useLogin(): UseLoginResult {
   };
 
   return {
-    email,
-    setEmail,
-    password,
-    setPassword,
     error,
     loading,
+    setLoading,
     isLoggedIn,
     authLoading,
-    handleLogin,
+    handleNativeLogin,
+    handleSocialLogin,
     handleLogout,
   };
 }

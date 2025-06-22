@@ -16,21 +16,21 @@
 
 /* @font-face 선언들은 fonts.css로 이동 */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  /*
-    Tailwind CSS의 font-sans 유틸리티가 사용할 폰트 스택을 정의합니다.
-    NanumSquare를 첫 번째, Gmarket Sans를 두 번째, Roboto를 세 번째 fallback으로 사용:
-  */
-  --font-sans: var(--font-nanum-square), var(--font-gmarket), var(--font-roboto);
-  --font-mono: var(--font-geist-mono); /* 모노스페이스 폰트는 유지하거나 필요시 변경 */
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #171717;
+    --foreground: #ffffff;
+
+    --font-weight-default: 400;
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --font-nanum-square: 'NanumSquare', Arial, Helvetica, sans-serif;
+    --font-gmarket: 'GmarketSans', Arial, Helvetica, sans-serif;
+    --font-roboto: 'Roboto', sans-serif;
+    --font-sans: var(--font-nanum-square), var(--font-gmarket), var(--font-roboto);
+    --font-mono: var(--font-geist-mono);
   }
 }
 

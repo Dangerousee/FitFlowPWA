@@ -9,6 +9,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const redirectUri = process.env.NEXT_PUBLIC_KAKAO_REDIRECT_URI;
 
   const tokenUrl = process.env.NEXT_PUBLIC_KAKAO_TOKEN_URI;
+  if (!tokenUrl) throw new Error('tokenUrl이 정의되지 않았습니다.');
+
+  if (!clientId || !clientSecret || !redirectUri || !code) {
+    throw new Error('토큰 요청에 필요한 값이 누락되었습니다.');
+  }
 
   try {
     const response = await fetch(tokenUrl, {

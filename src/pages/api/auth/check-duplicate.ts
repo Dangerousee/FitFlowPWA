@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { supabase } from '@lib/supabase';
 import * as ErrorCodes from '@constants/errorCodes';
+import { SignUpRequestDTO } from '@types';
 
 /**
  * 이메일 또는 사용자명 중복 여부를 개별적으로 확인하는 API
@@ -10,11 +11,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: '허용되지 않는 메소드입니다.' });
   }
 
-  const { email, username } = req.body as { email?: string; username?: string };
+  // const { email, username } = req.body as { email?: string; username?: string };
+  const body = req.body satisfies SignUpRequestDTO;
+  const { email, username, providerType, providerId } = body;
 
-  if (!email && !username) {
+  if (!body) {
     return res.status(400).json({
-      message: '이메일 또는 사용자명을 제공해야 합니다.',
+      message: '데이터를 제공해야 합니다.',
       code: ErrorCodes.MISSING_FIELD,
     });
   }
@@ -41,6 +44,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .from('users')
         .select('id', { count: 'exact', head: true })
         .eq('username', username);
+
+      if (error) throw error;
+      isUsernameDuplicate = !!count && count > 0;
+    }
+
+    // SNS 사용자 중복 확인
+    if (username) {
+      const { count, error } = await supabase
+        .from('users')
+        .select('id', { count: 'exact', head: true })
+        .eq('provider_type', providerType)
+        .eq('provider_id', providerId);
 
       if (error) throw error;
       isUsernameDuplicate = !!count && count > 0;

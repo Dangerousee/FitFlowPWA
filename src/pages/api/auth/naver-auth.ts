@@ -11,6 +11,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const tokenUrl = process.env.NEXT_PUBLIC_NAVER_TOKEN_URI +
     `?grant_type=authorization_code&client_id=${clientId}&client_secret=${clientSecret}&code=${code}&state=${state}`;
 
+  if (!tokenUrl) throw new Error('tokenUrl이 정의되지 않았습니다.');
+
   try {
     const response = await fetch(tokenUrl, { method: "GET" });
     const data = await response.json();

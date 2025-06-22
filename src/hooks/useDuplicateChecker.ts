@@ -7,7 +7,7 @@ export function useDuplicateChecker() {
 
   // 실제 API 요청 로직
   const checkDuplicate = async (field: 'email' | 'username', value: string) => {
-    const res = await fetch('/api/check-duplicate', {
+    const res = await fetch('/api/auth/check-duplicate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ [field]: value }),
@@ -18,6 +18,7 @@ export function useDuplicateChecker() {
   };
 
   // 디바운스된 함수: 300ms 대기 후 실행
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedCheckDuplicate = useCallback(
     debounce(async (field: 'email' | 'username', value: string) => {
       const isDuplicate = await checkDuplicate(field, value);

@@ -44,11 +44,18 @@ class MyDocument extends Document {
         <Head>
           <link rel="manifest" href="/manifest.json" />
           <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+          <link
+            rel="preload"
+            as="font"
+            href="/fonts/NanumSquare/WOFF/NanumSquareOTF_acR00.woff2"
+            type="font/woff2"
+            crossOrigin="anonymous"
+          />
           <meta name="theme-color" content="#000000" />
         </Head>
         <body>
-          <Main />
-          <NextScript />
+        <Main />
+        <NextScript />
         </body>
       </Html>
     );

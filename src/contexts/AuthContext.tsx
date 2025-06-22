@@ -1,17 +1,17 @@
 // src/contexts/AuthContext.tsx
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useLogin as useAuthHook } from '@hooks/useLogin';
-import {UseLoginResult} from "@models/auth.model";
+import { useLogin as useLoginHook } from '@hooks/useLogin';
+import {UseLoginResult} from "@/types/auth/hooks";
 
-const AuthContext = createContext<UseLoginResult | undefined>(undefined);
+const LoginContext = createContext<UseLoginResult | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const auth = useAuthHook();
-  return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>;
+  const auth = useLoginHook();
+  return <LoginContext.Provider value={auth}>{children}</LoginContext.Provider>;
 };
 
-export const useAuth = (): UseLoginResult => {
-  const context = useContext(AuthContext);
+export const useLogin = (): UseLoginResult => {
+  const context = useContext(LoginContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

@@ -10,7 +10,7 @@ interface LoginFormUIProps {
   password: string;
   onPasswordChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onLogin: () => void;
-  onRegister: () => void;
+  onRegister?: () => void;
   loading: boolean;
   error: string | null;
 }
@@ -59,7 +59,14 @@ export default function LoginFormUI({
           id={'1234'}
           value={email}
           type={TextFieldType.Text}
-          onClearButtonClick={() => onEmailChange({target: {value: ''}})}
+          onClearButtonClick={() => {
+            const fakeEvent = {
+              target: { value: '' }
+            } as unknown as React.ChangeEvent<HTMLInputElement>;
+
+            onEmailChange(fakeEvent);
+          }}
+
           onEventHandlers={{
             onChange: onEmailChange,
           }}
@@ -76,7 +83,13 @@ export default function LoginFormUI({
           id="password"
           value={password}
           type={TextFieldType.Password}
-          onClearButtonClick={() => onPasswordChange({target: {value: ''}})}
+          onClearButtonClick={() => {
+            const fakeEvent = {
+              target: { value: '' }
+            } as unknown as React.ChangeEvent<HTMLInputElement>;
+
+            onPasswordChange(fakeEvent);
+          }}
           onEventHandlers={{
             onChange: onPasswordChange,
           }}
