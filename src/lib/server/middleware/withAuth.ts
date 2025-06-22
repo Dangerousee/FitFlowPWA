@@ -1,7 +1,7 @@
 // lib/middleware/withAuth.ts
-import { verifyAccessToken } from '@lib';
+import { verifyAccessToken } from '@lib/shared';
 import type { NextApiHandler, NextApiResponse } from 'next';
-import { NextApiRequestWithUser } from '@types';
+import { AccessTokenPayload, NextApiRequestWithUser } from '@types';
 
 export function withAuth(handler: NextApiHandler) {
   return async (req: NextApiRequestWithUser, res: NextApiResponse) => {
@@ -12,7 +12,7 @@ export function withAuth(handler: NextApiHandler) {
     }
 
     const token = authHeader.split(' ')[1];
-    const payload = verifyAccessToken(token);
+    const payload = verifyAccessToken(token) as AccessTokenPayload;
 
     if (!payload) {
       return res.status(401).json({ message: '유효하지 않은 토큰입니다.' });

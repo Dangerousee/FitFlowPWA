@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import apiClient from '@lib/shared/axios';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method Not Allowed" });
@@ -16,26 +17,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const response = await fetch(tokenUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "authorization_code",
-        client_id: clientId,
-        client_secret: clientSecret,
-        redirect_uri: redirectUri,
-        code,
-      }),
+    const formParams = new URLSearchParams({
+      grant_type: 'authorization_code',
+      client_id: clientId,
+      client_secret: clientSecret,
+      redirect_uri: redirectUri,
+      code,
     });
 
-    const data = await response.json();
+    const { data } = await apiClient.post(tokenUrl, formParams, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
 
     if (data.access_token) {
       res.status(200).json(data);
     } else {
-      res.status(400).json({ error: "Failed to get access token", details: data });
+      res.status(400).json({ error: 'Failed to get access token', details: data });
     }
   } catch (error) {
-    res.status(500).json({ error: "Server error", details: error });
+    res.status(500).json({ error: 'Server error', details: error });
   }
+
 }

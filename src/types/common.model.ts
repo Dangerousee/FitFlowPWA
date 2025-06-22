@@ -1,4 +1,5 @@
 import type { NextApiRequest } from 'next';
+import { JwtPayload } from 'jsonwebtoken';
 
 export interface ApiErrorResponse {
   statusCode: number;
@@ -7,5 +8,13 @@ export interface ApiErrorResponse {
 };
 
 export interface NextApiRequestWithUser extends NextApiRequest {
-  user?: any; // 또는 정확한 타입: UserPayload 같은 타입
+  user?: {
+    userId: string;
+    [key: string]: any;
+  };
+}
+
+export interface AccessTokenPayload extends JwtPayload {
+  userId: string;
+  [key: string]: any;
 }

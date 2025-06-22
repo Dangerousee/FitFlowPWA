@@ -1,52 +1,53 @@
 import { ProviderType } from '@enums';
-import { SupabaseUserDTO } from '@types';
+import { UserDTO } from '@types';
+import apiClient from '@lib/shared/axios';
+import { API_ROUTES } from '@routes';
 
 interface AuthResponse {
   accessToken: string;
 }
 
-const fetchToken = async (url: string, body: object) => {
+const fetchToken = async (url: string, body: any): Promise<string | null> => {
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+    const { data } = await apiClient.post(url, body);
 
-    const data = await response.json();
-    if (!data.access_token) {
+    if (!data?.access_token) {
       console.error('토큰 요청 실패:', data);
       return null;
     }
+
     return data.access_token;
-  } catch (error) {
-    console.error('토큰 요청 오류:', error instanceof Error ? error.message : String(error));
+  } catch (error: any) {
+    console.error(
+      '토큰 요청 오류:',
+      error.response?.data?.message || error.message || String(error)
+    );
     return null;
   }
 };
 
-const fetchUserInfo = async (url: string, accessToken: string, providerType: string) => {
+const fetchUserInfo = async (
+  url: string,
+  accessToken: string,
+  providerType: string
+): Promise<any | null> => {
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessToken }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error(`${providerType} 사용자 정보 요청 실패:`, data);
-      return null;
-    }
+    const { data } = await apiClient.post(url, { accessToken });
 
     localStorage.setItem(`${providerType}_token`, accessToken);
     console.log(`${providerType} 사용자 정보:`, data);
+
     return data;
-  } catch (error) {
-    console.error(`${providerType} API 요청 오류:`, error instanceof Error ? error.message : String(error));
+  } catch (error: any) {
+    const errMsg =
+      error.response?.data?.message ||
+      (error instanceof Error ? error.message : String(error));
+
+    console.error(`${providerType} API 요청 실패:`, errMsg);
     return null;
   }
 };
+
 
 /**
  * SNS 인증 코드로부터 액세스 토큰을 발급받고 사용자 정보를 가져옵니다.
@@ -55,9 +56,9 @@ export const fetchUserData = async (
   providerType: ProviderType,
   code: string,
   state?: string
-): Promise<SupabaseUserDTO | null> => {
+): Promise<UserDTO | null> => {
   // 1️⃣ SNS별 인증 토큰 URL 및 바디 구성
-  const tokenUrl = providerType === ProviderType.KAKAO ? '/api/auth/kakao-auth' : '/api/auth/naver-auth';
+  const tokenUrl = providerType === ProviderType.KAKAO ? API_ROUTES.AUTH.KAKAO_AUTH : API_ROUTES.AUTH.NAVER_AUTH;
   const tokenBody = providerType === ProviderType.KAKAO ? { code } : { code, state };
 
   // 2️⃣ 액세스 토큰 발급
@@ -68,22 +69,21 @@ export const fetchUserData = async (
   }
 
   // 3️⃣ 사용자 정보 API URL 구성
-  const userUrl = providerType === ProviderType.KAKAO ? '/api/auth/kakao-user' : '/api/auth/naver-user';
+  const userUrl = providerType === ProviderType.KAKAO ? API_ROUTES.AUTH.KAKAO_USER : API_ROUTES.AUTH.NAVER_USER;
 
   // 4️⃣ 사용자 정보 가져오기
   return await fetchUserInfo(userUrl, accessToken, providerType);
 };
 
 // 회원 가입 (SNS 사용자 데이터를 내부 회원 데이터로 변환)
-const registerUser = async (userData: SupabaseUserDTO) => {
-  const response = await fetch('/api/auth/register', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(userData),
-  });
-
-  const result = await response.json();
-  return response.ok ? result : null;
+const registerUser = async (userData: UserDTO): Promise<any | null> => {
+  try {
+    const { data } = await apiClient.post(API_ROUTES.AUTH.SIGN_UP, userData);
+    return data;
+  } catch (error) {
+    console.error('회원 등록 실패:', error);
+    return null;
+  }
 };
 
 // 로그인 → 회원 정보 조회 → 회원 가입 진행

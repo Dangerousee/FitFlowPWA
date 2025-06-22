@@ -3,10 +3,16 @@ import { useAutoLogout } from './useAutoLogout';
 import { useRouter } from 'next/router';
 import { UseLoginResult, LoginRequestDTO } from "@types";
 import { LoginType, ProviderType } from '@enums';
-import { parseApiError } from '@lib/cleint';
+import {
+  isLoggedIn as checkIsLoggedIn,
+  parseApiError,
+  removeAccessToken,
+  removeStoredUser,
+  setAccessToken, setStoredUser,
+} from '@lib/cleint';
+import apiClient from '@lib/shared/axios';
+import { API_ROUTES } from '@routes/apis';
 // import { useRouter } from 'next/router';
-
-const AUTH_TOKEN_KEY = 'fitflow_auth_token';
 
 const LOGOUT_MESSAGES = {
   AUTO: '세션이 만료되어 자동으로 로그아웃되었습니다.',
@@ -41,8 +47,7 @@ export function useLogin(): UseLoginResult {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem(AUTH_TOKEN_KEY);
-    if (token) {
+    if (checkIsLoggedIn()) {
       setIsLoggedIn(true);
       // 필요하다면 여기서 토큰 유효성 검사 API 호출
     }
@@ -50,14 +55,27 @@ export function useLogin(): UseLoginResult {
   }, []);
 
   const performActualLogout = useCallback(
-    (logoutMessage: string, destinationUrl?: string | null) => {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem(AUTH_TOKEN_KEY);
+    async (logoutMessage: string, destinationUrl?: string | null) => {
+      try {
+        // 1. 서버 로그아웃 요청 (refreshToken 무효화 + 쿠키 삭제)
+        await apiClient.post(API_ROUTES.AUTH.LOGOUT, {}, { withCredentials: true });
+      } catch (err) {
+        console.error('서버 로그아웃 실패:', err);
+        // 실패해도 클라이언트 상태는 정리해야 하므로 계속 진행
+      } finally {
+        // 2. 클라이언트 상태 초기화
+        if (typeof window !== 'undefined') {
+          removeAccessToken();
+        }
+        removeStoredUser();
+        setIsLoggedIn(false);
+        setError(logoutMessage);
+        console.log(logoutMessage);
+
+        if (destinationUrl) {
+          router.push(destinationUrl);
+        }
       }
-      setError(logoutMessage); // 에러 상태에 로그아웃 메시지 설정
-      setIsLoggedIn(false);
-      console.log(logoutMessage); // 로그아웃 사유 로깅
-      if (destinationUrl) router.push(destinationUrl);
     },
     [/* router */]
   );
@@ -71,7 +89,8 @@ export function useLogin(): UseLoginResult {
     setError(null);
     // setIsLoggedIn(false); // 로그인 실패 시에는 authLoading 후 isLoggedIn이 false로 유지됨
     if (typeof window !== 'undefined') {
-      localStorage.removeItem(AUTH_TOKEN_KEY);
+      removeAccessToken();
+      removeStoredUser();
     }
   };
 
@@ -86,38 +105,30 @@ export function useLogin(): UseLoginResult {
     setError(null);
     setLoading(true);
     try {
-
-      const options = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(param),
-      };
-
-      const response = await fetch('/api/auth/login', options);
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error(`${options.method} 로그인 실패 (서버 응답)::`, data);
-        throw parseApiError(response, data);
-      }
+      const { data } = await apiClient.post(API_ROUTES.AUTH.LOGIN, param);
 
       console.log('로그인 성공:', data);
 
       if (typeof window !== 'undefined') {
-        localStorage.setItem(AUTH_TOKEN_KEY, data.accessToken || 'dummy_token');
+        setAccessToken(data.accessToken);
+        setStoredUser(data.user);
       }
-      setIsLoggedIn(true); // 로그인 성공 시 상태 업데이트
-      setError(null); // 이전 에러 메시지 클리어
 
-      return response;
+      setIsLoggedIn(true);
+      setError(null);
+      return data; // 혹은 data.user 등 필요한 값 반환
+
     } catch (err: any) {
       console.error('Login processing error:', err);
-      clearAuthErrorAndState(); // 토큰 제거 및 에러 상태 초기화
-      setIsLoggedIn(false); // 명시적으로 로그아웃 상태로 변경
-      setError(ERROR_MESSAGES.LOGIN_NETWORK + err.message);
+      const parsedError = parseApiError(err.response, err.response?.data);
+
+      clearAuthErrorAndState();
+      setIsLoggedIn(false);
+      setError(ERROR_MESSAGES.LOGIN_NETWORK + parsedError.message); // 상세 메시지 유지
     } finally {
       setLoading(false);
     }
+
   };
 
   const handleLogout = (destinationUrl?: string | null) => {

@@ -1,12 +1,14 @@
 import { NextApiRequest } from 'next';
-import { SupabaseUserDTO, LoginRequestDTO, RefreshSession, SignUpRequestDTO } from '@types';
+import { UserDTO, LoginRequestDTO, RefreshSession, SignUpRequestDTO } from '@types';
 import { AccountStatus, LoginType, ProviderType } from '@enums';
 import { hashToken, supabase } from '@lib/shared';
 import * as ErrorCodes from '@constants/errorCodes';
 import bcrypt from 'bcryptjs';
 import camelcaseKeys from 'camelcase-keys';
+import apiClient from '@lib/shared/axios';
+import { API_ROUTES } from '@routes';
 
-export async function authenticateSupabaseUser(body: LoginRequestDTO): Promise<SupabaseUserDTO> {
+export async function authenticateSupabaseUser(body: LoginRequestDTO): Promise<UserDTO> {
   switch (body.loginType) {
     case LoginType.NATIVE:
       return authenticateNativeSupabaseUser(body.email, body.password);
@@ -24,8 +26,8 @@ export async function authenticateSupabaseUser(body: LoginRequestDTO): Promise<S
 }
 
 /** Supabase 사용자 인증 처리 */
-export async function authenticateNativeSupabaseUser(email: string, plainPassword: string): Promise<SupabaseUserDTO> {
-  type UserWithPassword = SupabaseUserDTO & { password?: string };
+export async function authenticateNativeSupabaseUser(email: string, plainPassword: string): Promise<UserDTO> {
+  type UserWithPassword = UserDTO & { password?: string };
 
   if (!plainPassword || !email) {
     throw {
@@ -76,10 +78,10 @@ export async function authenticateNativeSupabaseUser(email: string, plainPasswor
 
   // 반환되는 사용자 객체에서 비밀번호 필드를 제거
   const { password, ...secureUserProfile } = userProfile;
-  return camelcaseKeys(secureUserProfile, { deep: true }) as SupabaseUserDTO;
+  return camelcaseKeys(secureUserProfile, { deep: true }) as UserDTO;
 }
 
-export async function authenticateSocialSupabaseUser(providerType: ProviderType, providerId: string): Promise<SupabaseUserDTO> {
+export async function authenticateSocialSupabaseUser(providerType: ProviderType, providerId: string): Promise<UserDTO> {
   const errMessage = `${providerType}: ${providerId}`;
 
   if (!providerType || !providerId) {
@@ -118,7 +120,7 @@ export async function authenticateSocialSupabaseUser(providerType: ProviderType,
     };
   }
 
-  const userProfile = camelcaseKeys(data, { deep: true }) as SupabaseUserDTO;
+  const userProfile = camelcaseKeys(data, { deep: true }) as UserDTO;
 
   if (!userProfile.providerType || !userProfile.providerId) {
     console.error(`로그인 실패 (${errMessage}): 사용자 레코드는 찾았으나 저장된 소셜 정보가 없습니다.`);
@@ -148,7 +150,7 @@ export async function authenticateSocialSupabaseUser(providerType: ProviderType,
 /**
  * 사용자 계정 상태를 확인합니다 (휴면, 탈퇴 등).
  */
-export async function checkUserAccountStatus(user: SupabaseUserDTO): Promise<void> {
+export async function checkUserAccountStatus(user: UserDTO): Promise<void> {
   switch (user.accountStatus) {
     case AccountStatus.ACTIVE:
       break;
@@ -190,7 +192,7 @@ export async function checkUserAccountStatus(user: SupabaseUserDTO): Promise<voi
 /**
  * 비밀번호 만료일 확인
  */
-export async function checkPasswordPolicy(user: SupabaseUserDTO): Promise<void> {
+export async function checkPasswordPolicy(user: UserDTO): Promise<void> {
   const passwordPolicyDays = 90;
   if (user.passwordLastChangedAt) {
     const lastChanged = new Date(user.passwordLastChangedAt);
@@ -209,7 +211,7 @@ export async function checkPasswordPolicy(user: SupabaseUserDTO): Promise<void> 
 /**
  * Supabase 사용자의 최종 로그인 시간 및 상태를 업데이트
  */
-export async function updateUserLoginDetails(userId: string, timestamp: string): Promise<SupabaseUserDTO> {
+export async function updateUserLoginDetails(userId: string, timestamp: string): Promise<UserDTO> {
   const { data: updatedUser, error } = await supabase
     .from('users')
     .update({
@@ -219,7 +221,7 @@ export async function updateUserLoginDetails(userId: string, timestamp: string):
     })
     .eq('id', userId)
     .select()
-    .single<SupabaseUserDTO>();
+    .single<UserDTO>();
 
   if (error || !updatedUser) {
     console.error(`Supabase last_login_at 업데이트 오류 (사용자 ID: ${userId}):`, error?.message);
@@ -234,7 +236,7 @@ export async function updateUserLoginDetails(userId: string, timestamp: string):
 }
 
 export async function createRefreshSession(
-  user: SupabaseUserDTO,
+  user: UserDTO,
   refreshToken: string,
   req: NextApiRequest
 ): Promise<RefreshSession> {
@@ -272,25 +274,14 @@ export async function createRefreshSession(
 }
 
 export async function checkDuplicate(param: SignUpRequestDTO): Promise<boolean> {
-
   try {
-    const options = {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(param),
-    };
-
-    const response = await fetch('/api/auth/check-duplicate', options);
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error(`${options.body} 유져 중복 체크 에러 (서버 응답)::`, data);
-      return false;
-    }
-
+    const { data } = await apiClient.post(API_ROUTES.AUTH.DUPLICATE_CHECKER, param);
     return true;
   } catch (err: any) {
-    console.error('SignUp processing error:', err);
+    console.error(
+      `${JSON.stringify(param)} 유저 중복 체크 에러 (서버 응답)::`,
+      err.response?.data || err.message || err
+    );
     return false;
   }
 }

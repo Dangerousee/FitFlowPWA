@@ -10,13 +10,18 @@ export interface ClientApiError extends Error {
  * - 이 유틸을 통해 클라이언트에서도 code 값을 안전하게 유지하고 분기 처리 가능
  *
  * 사용 예시:
- * const res = await fetch(...);
- * const data = await res.json();
- * if (!res.ok) throw parseApiError(res, data);
+ * try {
+ *   const { data } = await apiClient.post('/some/api', payload);
+ *   // ... 정상 처리
+ * } catch (err) {
+ *   throw parseApiError(err.response, err.response?.data);
+ * }
  */
+
 export function parseApiError(response: Response, data: any): ClientApiError {
-  const error = new Error(data.message || `HTTP ${response.status}`) as ClientApiError;
-  if (data.code) error.code = data.code; // 서버에서 내려준 error.code를 직접 복사
-  error.status = response.status;        // HTTP 상태코드도 활용 가능하도록 유지
+  const error = new Error(data?.message ?? `HTTP ${response.status}`) as ClientApiError;
+  error.status = response.status;
+  error.code = data?.code;
   return error;
 }
+

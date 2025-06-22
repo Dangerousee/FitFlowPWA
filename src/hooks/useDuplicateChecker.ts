@@ -1,20 +1,24 @@
 import { useState, useCallback } from 'react';
 import debounce from 'lodash.debounce';
+import apiClient from '@lib/shared/axios';
+import { API_ROUTES } from '@routes/apis';
+
 
 export function useDuplicateChecker() {
   const [emailDuplicate, setEmailDuplicate] = useState(false);
   const [usernameDuplicate, setUsernameDuplicate] = useState(false);
 
-  // 실제 API 요청 로직
   const checkDuplicate = async (field: 'email' | 'username', value: string) => {
-    const res = await fetch('/api/auth/check-duplicate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [field]: value }),
-    });
+    try {
+      const { data } = await apiClient.post(API_ROUTES.AUTH.DUPLICATE_CHECKER, {
+        [field]: value,
+      });
 
-    const data = await res.json();
-    return data.duplicateFields?.[field] === true;
+      return data.duplicateFields?.[field] === true;
+    } catch (err) {
+      console.error('중복 검사 요청 실패:', err);
+      return false; // 실패 시 중복 아닌 걸로 처리하거나, 별도 에러 핸들링 가능
+    }
   };
 
   // 디바운스된 함수: 300ms 대기 후 실행

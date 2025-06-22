@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import snakecaseKeys from 'snakecase-keys';
 import * as ErrorCodes from '@constants/errorCodes';
 import { LoginType } from '@enums';
-import { SignUpRequestDTO, SupabaseUserDTO } from '@types';
+import { SignUpRequestDTO, UserDTO } from '@types';
 import { supabase } from '@lib/shared';
 import { handleApiError } from '@lib/server';
 
@@ -25,7 +25,7 @@ function validate(payload: SignUpRequestDTO) {
   }
 }
 
-async function insertUser(param: SignUpRequestDTO): Promise<SupabaseUserDTO> {
+async function insertUser(param: SignUpRequestDTO): Promise<UserDTO> {
   const payload: Record<string, any> = { ...param };
 
   if (param.loginType === LoginType.NATIVE) {
@@ -36,7 +36,7 @@ async function insertUser(param: SignUpRequestDTO): Promise<SupabaseUserDTO> {
     .from('users')
     .insert([snakecaseKeys(payload)])
     .select()
-    .single<SupabaseUserDTO>();
+    .single<UserDTO>();
 
   if (error) {
     if (error.code === '23505') {

@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import apiClient from '@lib/shared/axios';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).json({ error: "허용되지 않은 요청 방식입니다." });
@@ -10,21 +11,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const response = await fetch("https://openapi.naver.com/v1/nid/me", {
-      method: "GET",
+    const { data } = await apiClient.get('https://openapi.naver.com/v1/nid/me', {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
 
-    const data = await response.json();
-
     if (data.response) {
       res.status(200).json(data.response);
     } else {
-      res.status(400).json({ error: "사용자 정보를 가져오는 데 실패했습니다.", details: data });
+      res.status(400).json({
+        error: '사용자 정보를 가져오는 데 실패했습니다.',
+        details: data,
+      });
     }
   } catch (error) {
-    res.status(500).json({ error: "서버 오류", details: error });
+    res.status(500).json({
+      error: '서버 오류',
+      details: error,
+    });
   }
 }

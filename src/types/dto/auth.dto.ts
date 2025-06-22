@@ -1,5 +1,5 @@
 import type { LoginType, ProviderType } from '@enums';
-import type { SupabaseUserDTO } from '@types';
+import type { PublicUserDTO, UserDTO } from '@types';
 
 export interface NativeLoginRequest {
   loginType: LoginType.NATIVE;
@@ -36,7 +36,7 @@ export type LoginRequestDTO = NativeLoginRequest | SocialLoginRequest;
 export type SignUpRequestDTO = NativeSignUpRequest | SocialSignUpRequest;
 
 export interface AuthResponseDTO {
-  user: SupabaseUserDTO;
+  user: PublicUserDTO;
   accessToken: string;
 }
 

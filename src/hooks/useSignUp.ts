@@ -17,6 +17,8 @@ import {
 } from '@lib';
 import { USER_ALREADY_EXISTS, USER_NOT_FOUND } from '@constants/errorCodes';
 import { authenticateSocialSupabaseUser } from '@lib/server';
+import apiClient from '@lib/shared/axios';
+import { API_ROUTES } from '@routes/apis';
 
 export function useSignUp(): UseSignUpResult {
   const [error, setError] = useState<string | null>(null);
@@ -77,28 +79,20 @@ export function useSignUp(): UseSignUpResult {
     setError(null);
     setLoading(true);
     try {
-      const options = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(param),
-      };
-
-      const response = await fetch('/api/auth/sign-up', options);
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error(`${options.method} 회원가입 실패 (서버 응답)::`, data);
-        throw parseApiError(response, data);
-      }
+      const { data } = await apiClient.post(API_ROUTES.AUTH.SIGN_UP, param);
 
       console.log('회원가입 성공:', data);
+      // 필요하면 여기서 setUser(data.user) 등도 가능
     } catch (err: any) {
-      console.error('SignUp processing error:', err);
-      setError(ERROR_MESSAGES.SIGNUP_NETWORK + (err.message || ''));
-      throw err;
+      console.error('SignUp processing error:', err.message);
+
+      const parsed = parseApiError(err.response, err.response?.data);
+      setError(ERROR_MESSAGES.SIGNUP_NETWORK + (parsed.message || ''));
+      throw parsed;
     } finally {
       setLoading(false);
     }
+
   };
 
   const handleSocialSignUpWithNativeLogin = async (param: {providerType: ProviderType, code: string, state?: string}): Promise<any> => {

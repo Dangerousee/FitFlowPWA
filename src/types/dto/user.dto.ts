@@ -1,6 +1,6 @@
 import { LoginType, ProviderType, AccountStatus, UserPlanType, UserRole } from '@enums';
 
-export interface SupabaseUserDTO {
+export interface UserDTO {
   /** 사용자의 고유 ID */
   id: string;
   /** 사용자 이름 (고유해야 함) */
@@ -41,7 +41,15 @@ export interface SupabaseUserDTO {
   userRole: UserRole;
   /** 사용자의 현재 계정 상태 */
   accountStatus: AccountStatus;
-};
-
-
+}
+// 보안을 이유로 클라이언트에게 내려줄것만 별도 DTO로 정의
+export interface PublicUserDTO {
+  id: string;
+  username: string;
+  email: string;
+  nickname?: string | null;
+  profileImageUrl?: string | null;
+  planType: UserPlanType;
+  userRole: UserRole;
+}
 

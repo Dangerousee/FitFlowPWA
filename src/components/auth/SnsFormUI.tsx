@@ -106,7 +106,7 @@ export default function SnsFormUI() {
     try {
       await handleSocialSignUp(data);
     } catch (error: any) {
-      console.error('소셜 회원가입 처리 중 오류:', error);
+      console.error('소셜 회원가입 처리 중 오류:', error.message);
       alert('회원가입 중 오류가 발생했습니다. 다시 시도해 주세요.');
       // 필요 시: throw error; 로 propagate 가능
     }
@@ -150,7 +150,7 @@ export default function SnsFormUI() {
       if (errorCode === USER_ALREADY_EXISTS) {
         alert(
           '이미 해당 이메일로 가입된 계정이 있습니다.\n'
-          + '- 기존 계정으로 로그인해 주세요 😊'
+          + '- 기존 계정으로 로그인해 주세요 😊\n'
           + '- 로그인 후 SNS 계정을 연결해 주세요 😊',
         );
         return;

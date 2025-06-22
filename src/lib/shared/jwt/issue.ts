@@ -1,11 +1,12 @@
 // lib/jwt/issue.ts
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import type { SupabaseUserDTO } from '@types';
+import type { UserDTO } from '@types';
 
 const ACCESS_SECRET = process.env.JWT_SECRET!;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
-const getPayload = (user: SupabaseUserDTO) => ({
+const getPayload = (user: UserDTO) => ({
+  userId: user.id,
   sub: user.id,
   email: user.email,
   username: user.username,
@@ -23,7 +24,7 @@ export function issueAccessTokenFromPayload(payload: JwtPayload): string {
 /**
  * Access Token 발급
  */
-export function issueAccessToken(user: SupabaseUserDTO): string {
+export function issueAccessToken(user: UserDTO): string {
   return jwt.sign(getPayload(user), ACCESS_SECRET, {
     algorithm: 'HS256',
     expiresIn: '1h',
@@ -33,7 +34,7 @@ export function issueAccessToken(user: SupabaseUserDTO): string {
 /**
  * Refresh Token 발급
  */
-export function issueRefreshToken(user: SupabaseUserDTO): string {
+export function issueRefreshToken(user: UserDTO): string {
   return jwt.sign(getPayload(user), REFRESH_SECRET, {
     algorithm: 'HS256',
     expiresIn: '7d',

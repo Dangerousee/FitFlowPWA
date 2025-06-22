@@ -10,6 +10,7 @@ import {
 } from '@lib/server';
 import { issueAccessToken, issueRefreshToken } from '@lib/shared';
 import { LoginRequestDTO, LoginResponseDTO } from '@types';
+import { transformUserToPublic } from '@lib/server';
 
 function isBaseLoginRequest(value: any): boolean {
   return value && typeof value === 'object' && 'loginType' in value;
@@ -52,7 +53,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 7. 응답 반환
     return res.status(200).json({
-      user: updatedUser,
+      user: transformUserToPublic(updatedUser),
       accessToken,
     } satisfies LoginResponseDTO);
   } catch (error) {

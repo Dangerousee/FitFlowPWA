@@ -1,15 +1,16 @@
 import { useLogin } from '@/contexts/AuthContext';
+import { isLoggedIn } from '@lib';
 
 const HandleLogout = () => {
   // authLoading 상태 추가
-  const { handleLogout, isLoggedIn, authLoading } = useLogin();
+  const { handleLogout, authLoading } = useLogin();
 
   // 인증 상태 확인 중일 때 로딩 메시지 표시
   if (authLoading) {
     return <p>인증 정보를 확인 중입니다...</p>;
   }
 
-  if (!isLoggedIn) {
+  if (!isLoggedIn()) {
     return <p>로그인이 필요합니다.</p>;
   }
 
