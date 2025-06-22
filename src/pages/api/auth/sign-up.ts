@@ -2,11 +2,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import snakecaseKeys from 'snakecase-keys';
-
-import { supabase, handleApiError } from '@lib';
 import * as ErrorCodes from '@constants/errorCodes';
 import { LoginType } from '@enums';
 import { SignUpRequestDTO, SupabaseUserDTO } from '@types';
+import { supabase } from '@lib/shared';
+import { handleApiError } from '@lib/server';
 
 function validate(payload: SignUpRequestDTO) {
   const { loginType, email, username } = payload;

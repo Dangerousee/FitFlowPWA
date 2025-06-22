@@ -7,26 +7,20 @@
  * → 회원가입 API나 로그인 라우트에서 login_type 미지정 방지 로직 추가
  */
 import { useState } from 'react';
-import { UseSignUpResult } from '@types';
+import { UseSignUpResult, SignUpRequestDTO } from '@types';
 import { LoginType, ProviderType } from '@enums';
-import { SignUpRequestDTO } from '@types';
 import {
-  authenticateSocialSupabaseUser,
   ClientError,
   fetchUserData,
-  handleApiError,
   normalizeSnsUser,
   parseApiError,
 } from '@lib';
 import { USER_ALREADY_EXISTS, USER_NOT_FOUND } from '@constants/errorCodes';
+import { authenticateSocialSupabaseUser } from '@lib/server';
 
 export function useSignUp(): UseSignUpResult {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
-  //
-  // 아직 우리 커뮤니티의 멤버가 아니시네요!
-  // 회원가입을 진행하시겠어요?
 
   const ERROR_MESSAGES = {
     SIGNUP_NETWORK: '회원가입 중 네트워크 또는 응답 처리 오류: ',

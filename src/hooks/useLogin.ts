@@ -1,10 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAutoLogout } from './useAutoLogout';
 import { useRouter } from 'next/router';
-import { UseLoginResult } from "@/types/auth/hooks";
+import { UseLoginResult, LoginRequestDTO } from "@types";
 import { LoginType, ProviderType } from '@enums';
-import { LoginRequestDTO } from '@types';
-import { parseApiError } from '@lib';
+import { parseApiError } from '@lib/cleint';
 // import { useRouter } from 'next/router';
 
 const AUTH_TOKEN_KEY = 'fitflow_auth_token';

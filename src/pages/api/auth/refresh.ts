@@ -1,5 +1,5 @@
 import { getCookie } from 'cookies-next';
-import { hashToken, issueAccessTokenFromPayload, supabase } from '@lib';
+import { hashToken, issueAccessTokenFromPayload, supabase } from '@lib/shared';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import type { NextApiRequest, NextApiResponse } from 'next';
 

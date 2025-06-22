@@ -6,10 +6,10 @@ import {
   checkUserAccountStatus,
   createRefreshSession,
   updateUserLoginDetails,
-} from '@lib/auth';
-import { issueAccessToken, issueRefreshToken } from '@lib';
+  handleApiError,
+} from '@lib/server';
+import { issueAccessToken, issueRefreshToken } from '@lib/shared';
 import { LoginRequestDTO, LoginResponseDTO } from '@types';
-import { handleApiError } from '@lib/errors/handleApiError';
 
 function isBaseLoginRequest(value: any): boolean {
   return value && typeof value === 'object' && 'loginType' in value;

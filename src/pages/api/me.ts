@@ -1,5 +1,5 @@
 // pages/api/me.ts
-import { withAuth } from '@lib';
+import { withAuth } from '@lib/server';
 import type { NextApiResponse } from 'next';
 import { NextApiRequestWithUser } from '@types';
 

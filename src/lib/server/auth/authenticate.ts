@@ -1,11 +1,10 @@
 import { NextApiRequest } from 'next';
 import { SupabaseUserDTO, LoginRequestDTO, RefreshSession, SignUpRequestDTO } from '@types';
 import { AccountStatus, LoginType, ProviderType } from '@enums';
-import { hashToken, supabase } from '@/lib';
+import { hashToken, supabase } from '@lib/shared';
 import * as ErrorCodes from '@constants/errorCodes';
 import bcrypt from 'bcryptjs';
 import camelcaseKeys from 'camelcase-keys';
-import { USER_NOT_FOUND } from '@constants/errorCodes';
 
 export async function authenticateSupabaseUser(body: LoginRequestDTO): Promise<SupabaseUserDTO> {
   switch (body.loginType) {

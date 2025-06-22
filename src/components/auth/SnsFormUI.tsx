@@ -1,6 +1,6 @@
 import { FaComment, FaGoogle, FaRegEnvelope } from 'react-icons/fa';
 import { useCallback, useEffect, useRef } from 'react';
-import { auth, googleProvider, signInWithPopup } from '@lib';
+import { auth, googleProvider, signInWithPopup } from '@lib/cleint';
 import { ProviderType } from '@enums';
 import { useLogin } from '@contexts/AuthContext';
 import { useSignUp } from '@hooks/useSignUp';
@@ -163,8 +163,8 @@ export default function SnsFormUI() {
   };
 
   const getSnsLoginUrl = (providerType: ProviderType, state?: string) => {
-    const clientId = ENV_MAP[providerType].CLIENT_ID;
-    const redirectUri = ENV_MAP[providerType].REDIRECT_URI;
+    const clientId = ENV_MAP[providerType as keyof typeof ENV_MAP].CLIENT_ID;
+    const redirectUri = ENV_MAP[providerType as keyof typeof ENV_MAP].REDIRECT_URI;
 
     if (!clientId || !redirectUri) return '';
 

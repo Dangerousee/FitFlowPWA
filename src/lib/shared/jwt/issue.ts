@@ -1,6 +1,6 @@
 // lib/jwt/issue.ts
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import type { SupabaseUserDTO } from '@/types/dto';
+import type { SupabaseUserDTO } from '@types';
 
 const ACCESS_SECRET = process.env.JWT_SECRET!;
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
