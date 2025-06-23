@@ -4,7 +4,7 @@ import { API_ROUTES } from '@routes/apis';
 import apiClient from '@lib/shared/axios';
 
 /** 로그인 된 사용자의 유효성 체크시 사용 */
-export const getCurrentUser = async (): Promise<PublicUserDTO> => {
+export const getMe = async (): Promise<PublicUserDTO> => {
   const userId = getStoredUser();
 
   if (!userId) {
@@ -33,10 +33,10 @@ export const findUser = async (
   }
 ): Promise<PublicUserDTO | null> => {
   try {
-    let endpoint = API_ROUTES.AUTH.ME;
+    let endpoint = API_ROUTES.AUTH.LOOKUP;
 
     if (params?.providerType && params?.providerId) {
-      endpoint += `providerType=${params.providerType}&providerId=${params.providerId}`;
+      endpoint += `?providerType=${params.providerType}&providerId=${params.providerId}`;
     } else if (params?.email) {
       endpoint += `?email=${params.email}`;
     }

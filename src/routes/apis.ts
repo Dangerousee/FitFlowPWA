@@ -18,6 +18,7 @@ export const API_ROUTES = {
     LOGOUT: '/auth/logout',
     SIGN_UP: '/auth/sign-up',
     ME: '/auth/me',
+    LOOKUP: '/auth/lookup',
     DUPLICATE_CHECKER: '/auth/check-duplicate',
 
     KAKAO_AUTH: '/auth/kakao-auth',

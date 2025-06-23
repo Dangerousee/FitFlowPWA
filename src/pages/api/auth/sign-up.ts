@@ -12,7 +12,9 @@ function validate(payload: SignUpRequestDTO) {
   const { loginType, email, username } = payload;
 
   if (!username) throw { statusCode: 400, message: 'username은 필수입니다.' };
-  if (!email) throw { statusCode: 400, message: 'email은 필수입니다.' };
+  if (loginType === LoginType.NATIVE && !email) {
+    throw { statusCode: 400, message: 'email은 필수입니다.' };
+  }
 
   if (loginType === LoginType.NATIVE && !payload.password) {
     throw { statusCode: 400, message: 'password는 필수입니다.' };

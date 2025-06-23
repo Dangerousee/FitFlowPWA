@@ -3,7 +3,7 @@ import type { NextApiResponse } from 'next';
 import { withAuth } from '@/lib/server/middleware/withAuth';
 import { NextApiRequestWithUser } from '@/types';
 import { getUserById } from '@/lib/server/db';
-import { transformUserToPublic } from '@lib/server/db/transformUser';
+import { transformUserToPublic } from '@lib/server/db';
 
 const handler = async (req: NextApiRequestWithUser, res: NextApiResponse) => {
   const { user } = req;
