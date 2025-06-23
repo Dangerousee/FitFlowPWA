@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAutoLogout } from './useAutoLogout';
 import { useRouter } from 'next/router';
-import { UseLoginResult, LoginRequestDTO } from "@types";
+import { LoginRequestDTO } from "@types";
 import { LoginType, ProviderType } from '@enums';
 import {
   isLoggedIn as checkIsLoggedIn,
@@ -22,6 +22,18 @@ const LOGOUT_MESSAGES = {
 const ERROR_MESSAGES = {
   LOGIN_NETWORK: '로그인 중 네트워크 또는 응답 처리 오류: ',
 };
+
+// 로그인 관련 훅의 반환 타입
+export interface UseLoginResult {
+  error: string | null;
+  loading: boolean;
+  authLoading: boolean;
+  isLoggedIn: boolean;
+  setLoading: (loading: boolean) => void;
+  handleNativeLogin: (email: string, password: string) => void;
+  handleSocialLogin: (providerType: ProviderType, providerId: string) => void;
+  handleLogout: (destinationUrl?: string | null) => void;
+}
 
 /**
  * - provider_id 기준 로그인 처리: SNS는 이메일보다 provider_id가 더 신뢰 가능

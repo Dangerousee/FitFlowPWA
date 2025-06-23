@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.tsx
 import React, { createContext, useContext, ReactNode } from 'react';
-import { useLogin as useLoginHook } from '@hooks/useLogin';
-import {UseLoginResult} from "@/types/auth/hooks";
+import { useLogin as useLoginHook, UseLoginResult } from '@hooks/useLogin';
+
 
 const LoginContext = createContext<UseLoginResult | undefined>(undefined);
 

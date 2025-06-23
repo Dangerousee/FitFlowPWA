@@ -7,18 +7,35 @@
  * → 회원가입 API나 로그인 라우트에서 login_type 미지정 방지 로직 추가
  */
 import { useState } from 'react';
-import { UseSignUpResult, SignUpRequestDTO } from '@types';
+import { SignUpRequestDTO } from '@types';
 import { LoginType, ProviderType } from '@enums';
-import {
-  ClientError,
-  fetchUserData,
-  normalizeSnsUser,
-  parseApiError,
-} from '@lib';
-import { USER_ALREADY_EXISTS, USER_NOT_FOUND } from '@constants/errorCodes';
-import { authenticateSocialSupabaseUser } from '@lib/server';
+import { parseApiError, } from '@lib';
 import apiClient from '@lib/shared/axios';
 import { API_ROUTES } from '@routes/apis';
+
+// 회원가입 관련 훅의 반환 타입
+export interface UseSignUpResult {
+  error: string | null;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
+
+  handleNativeSignUp: (params: {
+    email: string;
+    password: string;
+    username?: string;
+    nickname?: string | null;
+    profileImageUrl?: string | null;
+  }) => Promise<any>;
+
+  handleSocialSignUp: (params: {
+    email: any;
+    username: any;
+    nickname: any;
+    profileImageUrl: any;
+    providerType: ProviderType;
+    providerId: any;
+  }) => Promise<any>;
+}
 
 export function useSignUp(): UseSignUpResult {
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +72,7 @@ export function useSignUp(): UseSignUpResult {
   };
 
   const handleSocialSignUp = async (params: {
-    email: string,
+    email?: string | undefined,
     providerType: ProviderType;
     providerId: string;
     username?: string;
@@ -95,82 +112,11 @@ export function useSignUp(): UseSignUpResult {
 
   };
 
-  const handleSocialSignUpWithNativeLogin = async (param: {providerType: ProviderType, code: string, state?: string}): Promise<any> => {
-    const { providerType, code, state } = param;
-    let snsUserRaw: any | null = null;
-
-    setError(null);
-    setLoading(true);
-    try {
-      snsUserRaw = await fetchUserData(providerType, code, state);
-
-      if (!snsUserRaw) {
-        throw new ClientError({
-          statusCode: 400,
-          message: 'SNS 사용자 정보를 가져오지 못했습니다. 다시 시도해주세요.',
-        });
-      }
-
-      const snsUser = normalizeSnsUser(providerType, snsUserRaw);
-
-      const resposne = await authenticateSocialSupabaseUser(providerType, snsUser.providerId);
-
-      if (resposne) {
-        throw new ClientError({
-          statusCode: 200,
-          message: '해당 이메일로 가입된 계정이 존재합니다.',
-          code: USER_ALREADY_EXISTS,
-        });
-      }
-
-      return resposne;
-    } catch (err: any) {
-
-      // SNS 사용자 정보 요청 단계에서 예외 발생 - 비정상
-      if (!snsUserRaw) {
-        setError('SNS 사용자 정보를 가져오지 못했습니다. 다시 시도해주세요.');
-        throw new ClientError({
-          statusCode: 400,
-          message: 'SNS 사용자 정보를 가져오지 못했습니다. 다시 시도해주세요.',
-          code: err.code,
-        });
-      }
-
-      // 가입된 유져가 없는 경우- 정상
-      if (err.code === USER_NOT_FOUND || err.statusCode === 401) {
-        throw new ClientError({
-          ...err,
-          data: snsUserRaw
-        });
-      }
-
-      // 이미 해당 이메일로 가입된 계정 존재- 정상
-      if (err.code === USER_ALREADY_EXISTS) {
-        throw new ClientError({
-          ...err,
-          data: snsUserRaw
-        });
-      }
-
-      // 그외 비정상 케이스
-      setError('알 수 없는 오류가 발생했습니다. 관리자에게 문의해 주세요.');
-      throw new ClientError({
-        statusCode: err.statusCode,
-        message: '알 수 없는 오류가 발생했습니다. 관리자에게 문의해 주세요.',
-        code: err.code,
-        data: snsUserRaw
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return {
     error,
     loading,
     setLoading,
     handleNativeSignUp,
     handleSocialSignUp,
-    handleSocialSignUpWithNativeLogin,
   };
 }

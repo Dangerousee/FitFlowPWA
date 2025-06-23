@@ -26,7 +26,7 @@ export interface SocialSignUpRequest {
   loginType: LoginType.SOCIAL;
   providerType: ProviderType;
   providerId: string;
-  email: string;
+  email?: string;
   username: string;
   nickname?: string | null;
   profileImageUrl?: string | null;

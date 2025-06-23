@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { getAccessToken, setStoredUser, removeAccessToken, removeStoredUser } from '@lib/cleint';
-import { getMyProfile } from '@lib/cleint/api';
+import { getCurrentUser } from '@lib/cleint/api';
 
 export const useAuthEffect = () => {
   useEffect(() => {
@@ -9,7 +9,7 @@ export const useAuthEffect = () => {
       if (!token) return;
 
       try {
-        const user = await getMyProfile();
+        const user = await getCurrentUser();
         setStoredUser(user); // 유저 정보를 저장
       } catch (err) {
         // 토큰 유효하지 않음 → 로그아웃 처리

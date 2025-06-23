@@ -1,10 +1,11 @@
 import { FaComment, FaGoogle, FaRegEnvelope } from 'react-icons/fa';
 import { useCallback, useEffect, useRef } from 'react';
-import { auth, googleProvider, signInWithPopup } from '@lib/cleint';
+import { auth, fetchUserData, googleProvider, normalizeSnsUser, signInWithPopup } from '@lib/cleint';
 import { ProviderType } from '@enums';
 import { useLogin } from '@contexts/AuthContext';
 import { useSignUp } from '@hooks/useSignUp';
 import { USER_ALREADY_EXISTS, USER_NOT_FOUND } from '@constants/errorCodes';
+import { findUser } from '@lib/cleint/api';
 
 const ENV_MAP = {
   'kakao': {
@@ -30,7 +31,7 @@ export default function SnsFormUI() {
   const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
 
   const { isLoggedIn, loading, setLoading } = useLogin();
-  const { error, loading: signUpLoading, setLoading: setSignUpLoading, handleSocialSignUp, handleSocialSignUpWithNativeLogin } = useSignUp();
+  const { error, loading: signUpLoading, setLoading: setSignUpLoading, handleSocialSignUp } = useSignUp();
 
   // 기존 메시지 핸들러 제거 함수
   // - `window.removeEventListener`를 호출하여 이전 핸들러 삭제
@@ -113,17 +114,17 @@ export default function SnsFormUI() {
   }
 
   const processSnsLoginAndRegister = async ({
-    provider,
+    providerType,
     code,
     state,
     receivedState,
   }: {
-    provider: ProviderType;
+    providerType: ProviderType;
     code: string;
     state?: string;
     receivedState?: string;
   }) => {
-    if (provider === ProviderType.NAVER && state && state !== receivedState) {
+    if (providerType === ProviderType.NAVER && state && state !== receivedState) {
       console.error('로그인 실패: state 값이 일치하지 않습니다.');
       return;
     }
@@ -131,31 +132,28 @@ export default function SnsFormUI() {
     setLoading(true);
 
     try {
-      await handleSocialSignUpWithNativeLogin({ providerType: provider, code, state });
-    } catch (err: any) {
-      const { statusCode, code: errorCode, data } = err;
+      const snsUserRaw = await fetchUserData(providerType, code, state);
+      const snsUser = normalizeSnsUser(providerType, snsUserRaw);
+      const resposne = await findUser({ providerType: providerType, providerId: snsUser.providerId});
 
-      console.log({statusCode, errorCode, data});
+      console.log({resposne});
 
-      if (errorCode === USER_NOT_FOUND || statusCode === 401) {
+      if (!resposne) {
         const shouldSignUp = confirm(
           '아직 우리 커뮤니티의 멤버가 아니시네요!\n회원가입을 진행하시겠어요?',
         );
         if (shouldSignUp) {
-          await trySocialSignUp(data);
+          await trySocialSignUp(snsUser);
         }
-        return;
-      }
-
-      if (errorCode === USER_ALREADY_EXISTS) {
+      } else {
         alert(
           '이미 해당 이메일로 가입된 계정이 있습니다.\n'
           + '- 기존 계정으로 로그인해 주세요 😊\n'
           + '- 로그인 후 SNS 계정을 연결해 주세요 😊',
         );
-        return;
       }
 
+    } catch (err: any) {
       alert('알 수 없는 오류가 발생했습니다.');
     } finally {
       setLoading(false);
@@ -192,7 +190,7 @@ export default function SnsFormUI() {
       state,
       onSuccess: (code, state) =>
         processSnsLoginAndRegister({
-          provider,
+          providerType: provider,
           code: code,
           state: state,
           receivedState: state,
