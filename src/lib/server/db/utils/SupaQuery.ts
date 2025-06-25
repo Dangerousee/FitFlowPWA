@@ -16,7 +16,7 @@ import { PostgrestSingleResponse } from '@supabase/supabase-js';
  *   .fetch(FetchMode.MAYBE_SINGLE);
  */
 export class SupaQuery<T> {
-  private conditions: Partial<Record<keyof T, any>> = {};
+  private conditions: Partial<Record<keyof any, any>> = {};
   private selectedFields: string[] = [];
   private joinString?: string;
   private table: string;
@@ -25,7 +25,7 @@ export class SupaQuery<T> {
     this.table = table;
   }
 
-  eqs(conditions: Partial<Record<keyof T, any>>) {
+  eqs(conditions: Partial<Record<keyof any, any>>) {
     this.conditions = { ...this.conditions, ...conditions };
     return this;
   }
@@ -40,16 +40,19 @@ export class SupaQuery<T> {
     return this;
   }
 
-  async fetch(mode: FetchMode = FetchMode.LIST): Promise<any> {
+  async fetch(mode: FetchMode = FetchMode.LIST): Promise<| PostgrestSingleResponse<T>
+    | PostgrestSingleResponse<T | null>
+    | any // for LIST mode → SupabaseFilterBuilder<any>, 런타임에서 select() 수행됨
+  > {
     const base = supabase.from(this.table);
-    const filtered = applyEqConditions<T>(base, this.conditions);
-
+    const filtered = applyEqConditions<any>(base, this.conditions);
+    console.log("Asdfasdf", filtered);
     const baseFields = this.selectedFields.length > 0 ? buildSelectFields(this.selectedFields) : '*';
     const selectExpr = [baseFields, this.joinString].filter(Boolean).join(', ');
     const query = filtered.select(selectExpr);
 
-    if (mode === FetchMode.SINGLE) return query.single() as PostgrestSingleResponse<any>;
-    if (mode === FetchMode.MAYBE_SINGLE) return query.maybeSingle() as PostgrestSingleResponse<any | null>;
+    if (mode === FetchMode.SINGLE) return query.single() as PostgrestSingleResponse<T>;
+    if (mode === FetchMode.MAYBE_SINGLE) return query.maybeSingle() as PostgrestSingleResponse<T | null>;
 
     return query;
   }

@@ -3,12 +3,11 @@ import type { UserDTO } from '@/types';
 import camelcaseKeys from 'camelcase-keys';
 import { SupaQuery } from '@lib/server/db/utils/SupaQuery';
 import { FetchMode } from '@lib/server/db/utils/queryBuilder';
-
-const DB_TABE = "users";
+import { DB_USERS } from '@/lib';
 
 export const getUserById = async (id: string): Promise<UserDTO | null> => {
 
-  const { data, error } = await new SupaQuery(DB_TABE).eqs({ id }).fetch(FetchMode.SINGLE);
+  const { data, error } = await new SupaQuery(DB_USERS).eqs({ id }).fetch(FetchMode.SINGLE);
   if (error) {
     console.error('[getUserById]', error);
     return null;

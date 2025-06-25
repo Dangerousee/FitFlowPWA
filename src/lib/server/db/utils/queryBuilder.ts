@@ -101,7 +101,7 @@ export async function buildSelectQuery<T>(
 
 /**
  * 📌 INSERT 단건 예시:
- * await buildInsertQuery('posts', {
+ * await buildInsertQuery<RefreshSession>('posts', {
  *   title: 'New Post',
  *   content: 'Hello world!',
  * });
@@ -111,13 +111,22 @@ export async function buildSelectQuery<T>(
  *   { title: 'Post 1', content: 'A' },
  *   { title: 'Post 2', content: 'B' },
  * ]);
+ *
+ * 📌 INSERT 예시 (다건 & 빠르게 처리):
+ * await buildInsertQuery('posts', [ ... ], true);
+ *
+ * payload에 T를 붙이면 카멜케이스인 DTO와 맞지않는다. 전부 만들어주는거보다는 any로하고
+ * buildInsertQuery<RefreshSession>처럼 타입을 붙여 명시적인 추론이 가능하도록 한다.
  */
 export function buildInsertQuery<T>(
   table: string,
-  payload: T | T[]
+  payload: any | any[],
+  minimal: boolean = false
 ) {
-  return supabase.from(table).insert(payload).select(); // 배열 insert도 자동 처리됨
+  const base = supabase.from(table).insert(payload);
+  return minimal ? base : base.select();
 }
+
 
 /**
  * 📌 UPSERT 단건 예시:
@@ -132,37 +141,57 @@ export function buildInsertQuery<T>(
  *   { provider_type: 'kakao', provider_id: 'abc123', user_id: 'user1' },
  *   { provider_type: 'naver', provider_id: 'xyz456', user_id: 'user2' },
  * ]);
+ *
+ * 📌 UPSERT 예시 (성능 최적화):
+ * await buildUpsertQuery('users', [ ... ], true);
  */
 export function buildUpsertQuery<T>(
   table: string,
-  payload: T | T[]
+  payload: any | any[],
+  minimal: boolean = false
 ) {
-  return supabase.from(table).upsert(payload).select(); // 중복이면 update, 아니면 insert
+  const base = supabase.from(table).upsert(payload);
+  return minimal ? base : base.select();
 }
+
 
 /**
  * 📌 UPDATE 단건 예시:
  * await buildUpdateQuery('users', { nickname: '종원킹' }, { id: userId });
+ *
+ * 📌 UPDATE 여러건 예시 (같은 조건에 해당하는 유저들 nickname 변경):
+ * await buildUpdateQuery('users', { nickname: '게스트종원' }, { role: 'guest' });
+ *
+ * * 📌 UPDATE 예시 (데이터 반환 X → 성능 ↑):
+ *  * await buildUpdateQuery('users', { last_login_at: new Date() }, { id: userId }, true);
  */
 export function buildUpdateQuery<T>(
   table: string,
-  payload: Partial<T>,
-  conditions: Partial<Record<keyof T, any>>
+  payload: Partial<any>,
+  conditions: Partial<Record<keyof any, any>>,
+  minimal: boolean = false
 ) {
   const base = supabase.from(table).update(payload);
-  return applyEqConditions<T>(base, conditions).select();
+  const query = applyEqConditions<any>(base, conditions);
+  return minimal ? query : query.select(); // select 생략 → returning: 'minimal'
 }
 
 /**
  * 📌 DELETE 단건 예시:
  * await buildDeleteQuery('comments', { post_id: postId, user_id: userId });
+ *
+ * 📌 DELETE 예시 (빠르게 여러 건 삭제):
+ * await buildDeleteQuery('comments', { user_type: 'guest' }, true);
  */
 export function buildDeleteQuery<T>(
   table: string,
-  conditions: Partial<Record<keyof T, any>>
+  conditions: Partial<Record<keyof any, any>>,
+  minimal: boolean = false
 ) {
   const base = supabase.from(table).delete();
-  return applyEqConditions<T>(base, conditions);
+  const query = applyEqConditions<any>(base, conditions);
+  return minimal ? query : query.select();
 }
+
 
 
