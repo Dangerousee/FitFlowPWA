@@ -1,6 +1,6 @@
 import { LoginType, ProviderType, AccountStatus, UserPlanType, UserRole } from '@enums';
 
-export interface UserDTO {
+export interface UserDTO extends Record<string, unknown> {
   /** 사용자의 고유 ID */
   id: string;
   /** 사용자 이름 (고유해야 함) */
@@ -43,7 +43,7 @@ export interface UserDTO {
   accountStatus: AccountStatus;
 }
 // 보안을 이유로 클라이언트에게 내려줄것만 별도 DTO로 정의
-export interface PublicUserDTO {
+export interface PublicUserDTO extends Record<string, unknown> {
   id: string;
   username: string;
   email: string;

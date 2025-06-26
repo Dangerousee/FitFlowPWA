@@ -47,6 +47,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# 서비스 워커(Service Worker) 파일
+/public/sw.js
+
 # WebStorm 설정 관련 폴더 및 파일
 .idea/            # 프로젝트 설정 폴더 (자동 생성됨)
 *.iml             # IntelliJ 기반 프로젝트 설정 파일
