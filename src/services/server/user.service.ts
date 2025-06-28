@@ -6,28 +6,23 @@ import bcrypt from 'bcryptjs';
 import snakecaseKeys from 'snakecase-keys';
 import { HttpStatusCode } from 'axios';
 import { FetchMode, SupaQuery } from '@lib/server/db';
+import { StatusCodes } from 'http-status-codes';
+import { isEmpty } from '@firebase/util';
 
-/**
- * 🔍 Public lookup methods (No accessToken required)
- *
- * - 사용자의 존재 여부를 email 또는 providerId로 조회하는 목적으로 사용됩니다.
- * - 로그인된 사용자 정보 또는 민감한 정보 조회에는 절대 사용하지 마세요!
- */
 export const findById = async (id: string): Promise<UserDTO | null> => {
-  const { data, error } = await new SupaQuery(DB_TABLES.USERS).eqs({ id }).fetch(FetchMode.SINGLE);
+  const { data, error } = await new SupaQuery(DB_TABLES.USERS).eqs({ id }).fetch(FetchMode.MAYBE_SINGLE);
 
   if (error) {
     console.error('[getUserById]', error);
-    return null;
+    throw {
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+    }
   }
 
   // 💡 추가: data가 null인 경우를 명시적으로 처리
   // Supabase의 single() 쿼리는 일치하는 레코드가 없을 때 data: null, error: null을 반환할 수 있음.
-  if (data === null) {
-    return null;
-  }
-
-  return camelcaseKeys(data) as UserDTO;
+  return data ? (camelcaseKeys(data) as UserDTO) : null;
 };
 
 /**
@@ -35,17 +30,20 @@ export const findById = async (id: string): Promise<UserDTO | null> => {
  * @param email - 조회할 사용자의 이메일
  * @returns 사용자 정보 또는 null
  */
-export const findByEmail = async (email: string): Promise<UserDTO | null> => {
+export const findByEmail = async (email: string, loginType: LoginType): Promise<UserDTO | null> => {
   const { data, error } = await new SupaQuery(DB_TABLES.USERS)
-    .eq('email', email)
-    .fetch(FetchMode.SINGLE);
+    .eqs({'email': email, loginType: loginType})
+    .fetch(FetchMode.MAYBE_SINGLE);
 
   if (error) {
     console.error('[getUserByEmail]', error);
-    return null;
+    throw {
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+    }
   }
 
-  return camelcaseKeys(data) as UserDTO;
+  return data ? (camelcaseKeys(data) as UserDTO) : null;
 };
 
 /**
@@ -63,22 +61,25 @@ export const findByProviderInfo = async ({
 }): Promise<UserDTO | null> => {
   const { data, error } = await new SupaQuery(DB_TABLES.USERS)
     .eqs({ provider_type: providerType, provider_id: providerId })
-    .fetch(FetchMode.SINGLE);
+    .fetch(FetchMode.MAYBE_SINGLE);
 
   if (error) {
     console.error('[getUserByProviderInfo]', error);
-    return null;
+    throw {
+      statusCode: StatusCodes.BAD_REQUEST,
+      message: error.message,
+    }
   }
 
-  return camelcaseKeys(data) as UserDTO;
+  return data ? (camelcaseKeys(data) as UserDTO) : null;
 };
 
-export const insertUser = async (param: SignUpRequestDTO): Promise<UserDTO> => {
-  if (param.loginType === LoginType.NATIVE) {
-    param.password = await bcrypt.hash(param.password, 10);
+export const insertUser = async (dto: SignUpRequestDTO): Promise<UserDTO> => {
+  if (dto.loginType === LoginType.NATIVE) {
+    dto.password = await bcrypt.hash(dto.password, 10);
   }
 
-  const { data, error } = await new SupaQuery(DB_TABLES.USERS).insert(snakecaseKeys(param as Record<string, any>));
+  const { data, error } = await new SupaQuery(DB_TABLES.USERS).insert(snakecaseKeys(dto as Record<string, any>));
 
   if (error) {
     if (error.code === '23505') {
@@ -97,12 +98,12 @@ export const insertUser = async (param: SignUpRequestDTO): Promise<UserDTO> => {
     };
   }
 
-  if (!data) {
+  if (!data || isEmpty(data)) {
     throw {
       statusCode: HttpStatusCode.InternalServerError,
       message: '프로필 생성 후 데이터를 받아오지 못했습니다.',
     };
   }
 
-  return data as unknown as UserDTO;
+  return camelcaseKeys(data[0]) as UserDTO;
 }

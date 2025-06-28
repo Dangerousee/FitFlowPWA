@@ -233,33 +233,33 @@ export class SupaQuery<T extends Record<string, any>> {
     //   }
     // }
 
-    if (mode === FetchMode.SINGLE) {
-      return await queryBuilder.single<T>();
-    }
-    if (mode === FetchMode.MAYBE_SINGLE) {
-      return await queryBuilder.maybeSingle<T>();
-    }
-
-    // try {
-    //   if (mode === FetchMode.SINGLE) {
-    //     return await queryBuilder.single<T>();
-    //   }
-    //   if (mode === FetchMode.MAYBE_SINGLE) {
-    //     return await queryBuilder.maybeSingle<T>();
-    //   }
-    //   return await queryBuilder;
-    // } catch (error: any) {
-    //   // 'PGRST116' 에러가 아니면 콘솔에 로깅
-    //   if (error?.code !== 'PGRST116') {
-    //     console.error(`SupaQuery Fetch Error:`, {
-    //       message: error.message,
-    //       details: error.details,
-    //       code: error.code,
-    //     });
-    //   }
-    //   // Supabase의 원래 응답 구조를 유지하기 위해 에러를 포함한 객체를 반환
-    //   return { data: null, error, count: null, status: error.status || 500, statusText: error.message };
+    // if (mode === FetchMode.SINGLE) {
+    //   return await queryBuilder.single<T>();
     // }
+    // if (mode === FetchMode.MAYBE_SINGLE) {
+    //   return await queryBuilder.maybeSingle<T>();
+    // }
+
+    try {
+      if (mode === FetchMode.SINGLE) {
+        return await queryBuilder.single<T>();
+      }
+      if (mode === FetchMode.MAYBE_SINGLE) {
+        return await queryBuilder.maybeSingle<T>();
+      }
+      return await queryBuilder;
+    } catch (error: any) {
+      // 'PGRST116' 에러가 아니면 콘솔에 로깅
+      if (error?.code !== 'PGRST116') {
+        console.error(`SupaQuery Fetch Error:`, {
+          message: error.message,
+          details: error.details,
+          code: error.code,
+        });
+      }
+      // Supabase의 원래 응답 구조를 유지하기 위해 에러를 포함한 객체를 반환
+      return { data: null, error, count: null, status: error.status || 500, statusText: error.message };
+    }
 
     return queryBuilder;
   }
