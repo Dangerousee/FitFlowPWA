@@ -7,8 +7,7 @@ import camelcaseKeys from 'camelcase-keys';
 import { isEmpty } from '@firebase/util';
 import { NextApiRequest } from 'next';
 import { hashToken } from '@lib/shared/jwt';
-import { FetchMode, SupaQuery } from '@lib/server/db/utils/supa-query';
-import { buildInsertQuery, buildUpdateQuery } from '@lib/server/db/utils/query-builder';
+import { FetchMode, SupaQuery, buildInsertQuery, buildUpdateQuery } from '@lib/server/db';
 
 export async function authUser(body: LoginRequestDTO): Promise<UserDTO> {
   switch (body.loginType) {

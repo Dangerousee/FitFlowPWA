@@ -5,7 +5,7 @@ import { LoginType } from '@enums';
 import bcrypt from 'bcryptjs';
 import snakecaseKeys from 'snakecase-keys';
 import { HttpStatusCode } from 'axios';
-import { FetchMode, SupaQuery } from '@lib/server/db/utils/supa-query';
+import { FetchMode, SupaQuery } from '@lib/server/db';
 
 /**
  * 🔍 Public lookup methods (No accessToken required)

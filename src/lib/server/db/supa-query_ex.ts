@@ -1,5 +1,4 @@
-import { SupaQuery } from '@lib/server/db/utils/supa-query';
-import { FetchMode } from '@lib/server/db/utils/supa-query';
+import { SupaQuery, FetchMode } from '@lib/server/db';
 
 enum AccountStatus {
   ACTIVE = 'active',      // 활성 상태

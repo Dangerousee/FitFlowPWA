@@ -2,8 +2,8 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import * as cookie from 'cookie';
 import { DB_TABLES } from '@/constants';
 import { applyCors } from '@lib/server/middleware';
+import { SupaQuery } from '@lib/server/db';
 import { hashToken } from '@lib/shared/jwt';
-import { SupaQuery } from '@lib/server/db/utils/supa-query';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (applyCors(req, res)) return; // OPTIONS면 여기서 끝

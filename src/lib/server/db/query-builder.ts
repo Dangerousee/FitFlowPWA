@@ -1,7 +1,7 @@
 import type { PostgrestSingleResponse, SupabaseClient } from '@supabase/supabase-js';
 import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
-import { supabase } from '@/services/shared/supabase';
-import { FetchMode } from '@lib/server/db/utils/supa-query'; // PostgrestFilterBuilder 임포트 확인
+import { supabase } from '@lib/server/config/supabase';
+import { FetchMode } from '@lib/server/db'; // PostgrestFilterBuilder 임포트 확인
 
 /**
  * 조건 객체를 기반으로 `.eq()`를 동적으로 체이닝합니다.

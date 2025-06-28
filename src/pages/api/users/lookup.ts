@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { findByEmail, findByProviderInfo } from '@/services/server/user.service';
-import { transformUserToPublic } from '@lib/server/db/utils/transform-user';
+import { transformUserToPublic } from '@lib/server/db/transform-user';
 import { HttpStatusCode } from 'axios';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {

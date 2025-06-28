@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { SignUpRequestDTO } from '@types';
 import { DB_TABLES, ERROR_CODES } from '@/constants';
-import { SupaQuery } from '@lib/server/db/utils/supa-query';
+import { SupaQuery } from '@lib/server/db';
 
 /**
  * 이메일 또는 사용자명 중복 여부를 개별적으로 확인하는 API

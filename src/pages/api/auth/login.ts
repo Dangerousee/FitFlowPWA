@@ -3,7 +3,7 @@ import { LoginRequestDTO, LoginResponseDTO } from '@types';
 import { handleApiErrors } from '@lib/server/errors/handle-api-errors';
 import * as AuthService from '@/services/server/auth.service';
 import { issueAccessToken, issueRefreshToken } from '@lib/shared/jwt';
-import { transformUserToPublic } from '@lib/server/db/utils/transform-user';
+import { transformUserToPublic } from '@lib/server/db/transform-user';
 
 function isBaseLoginRequest(value: any): boolean {
   return value && typeof value === 'object' && 'loginType' in value;

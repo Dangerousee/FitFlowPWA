@@ -5,7 +5,7 @@ import {
   User,
   AuthError,
 } from 'firebase/auth';
-import { auth } from '@lib/cleint/firebase'; // 위에서 생성한 firebase 초기화 파일
+import { auth } from '@lib/cleint/config/firebase'; // 위에서 생성한 firebase 초기화 파일
 
 export default function Index() {
   const [email, setEmail] = useState('');

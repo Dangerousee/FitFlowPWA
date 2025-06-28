@@ -4,8 +4,8 @@
  * =======================
  */
 import { PostgrestFilterBuilder, PostgrestQueryBuilder, PostgrestSingleResponse } from '@supabase/postgrest-js';
-import { buildSelectFields } from '@lib/server/db/utils/query-builder';
-import { supabase } from '@/services/shared/supabase';
+import { buildSelectFields } from '@lib/server/db/query-builder';
+import { supabase } from '@lib/server/config/supabase';
 
 // 쿼리 작업의 타입을 정의. 확장성을 위해 문자열 리터럴 유니언 사용
 type FilterMethod = 'eq' | 'gt' | 'lt' | 'gte' | 'lte' | 'like' | 'ilike' | 'in';

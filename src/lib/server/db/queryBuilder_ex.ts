@@ -1,5 +1,5 @@
 import { buildSelectQuery } from './query-builder';
-import { FetchMode } from '@lib/server/db/utils/supa-query';
+import { FetchMode } from '@lib/server/db';
 
 // 예시 1: 특정 필드만 선택적으로 가져오기
 async function getUserEmailAndNickname(userId: string) {

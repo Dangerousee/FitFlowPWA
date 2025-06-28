@@ -1,6 +1,6 @@
 // pages/some-data-page.tsx (예시)
 import { useEffect, useState } from 'react';
-import { supabase } from '@/services/shared/supabase';
+import { supabase } from '@lib/server/config/supabase';
 
 interface Todo {
   id: number;

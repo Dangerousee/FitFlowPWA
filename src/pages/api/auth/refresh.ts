@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { DB_TABLES } from '@/constants';
 import { hashToken, issueAccessTokenFromPayload } from '@lib/shared/jwt';
-import { FetchMode, SupaQuery } from '@lib/server/db/utils/supa-query';
+import { FetchMode, SupaQuery } from '@lib/server/db';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const rawToken = getCookie('refreshToken', { req, res });

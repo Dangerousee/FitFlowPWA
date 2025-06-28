@@ -6,7 +6,7 @@ import { useSignUp } from '@hooks/useSignUp';
 import { fetchUserData } from '@/services/client/auth-social.service';
 import { normalizeSnsUser } from '@types';
 import { findUser } from '@/services/client/user.service';
-import { auth, googleProvider, signInWithPopup } from '@lib/cleint/firebase';
+import { auth, googleProvider, signInWithPopup } from '@lib/cleint/config/firebase';
 
 const ENV_MAP = {
   'kakao': {
