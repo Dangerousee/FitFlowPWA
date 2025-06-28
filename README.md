@@ -28,25 +28,28 @@ npm test
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+# 🏋️ Fit Flow - 피트니스 PWA
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+Fit Flow는 사용자가 자신의 운동 루틴을 기록하고 진행 상황을 추적할 수 있도록 돕는 프로그레시브 웹 앱(PWA)입니다.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+## ✨ 주요 기능
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+-   소셜 로그인 (Google, Kakao) 및 이메일 회원가입
+-   운동 루틴 생성 및 관리
+-   날짜별 운동 기록 및 조회
+-   (추가 예정) 운동 성과 통계 및 차트
 
-## Learn More
+## 🛠️ 기술 스택
 
-To learn more about Next.js, take a look at the following resources:
+-   **Framework**: Next.js (App Router)
+-   **Language**: TypeScript
+-   **Styling**: Tailwind CSS, clsx
+-   **Backend & DB**: Supabase
+-   **State Management**: Zustand (또는 Jotai)
+-   **Linting & Formatting**: ESLint, Prettier
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+## 🚀 시작하기
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 1. 환경 변수 설정
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+프로젝트를 실행하기 전에, 루트 디렉토리에 `.env.local` 파일을 생성하고 아래 내용을 채워주세요. Supabase 프로젝트 대시보드에서 키를 확인할 수 있습니다.

@@ -1,6 +1,6 @@
 import { LoginType, ProviderType, AccountStatus, UserPlanType, UserRole } from '@enums';
 
-export interface UserDTO extends Record<string, unknown> {
+export interface UserDTO {
   /** 사용자의 고유 ID */
   id: string;
   /** 사용자 이름 (고유해야 함) */
@@ -16,7 +16,7 @@ export interface UserDTO extends Record<string, unknown> {
   /** 현재 구독이 활성 상태인지 여부 */
   isSubscriptionActive?: boolean;
   /** 사용자 정보 최종 업데이트 일시 (ISO 8601 형식) */
-  updateAt?: string | null;
+  updatedAt?: string | null;
   /** 사용자의 별명 또는 표시 이름 */
   nickname?: string | null;
   /** 프로필 이미지 URL */
@@ -42,8 +42,9 @@ export interface UserDTO extends Record<string, unknown> {
   /** 사용자의 현재 계정 상태 */
   accountStatus: AccountStatus;
 }
+
 // 보안을 이유로 클라이언트에게 내려줄것만 별도 DTO로 정의
-export interface PublicUserDTO extends Record<string, unknown> {
+export interface PublicUserDTO {
   id: string;
   username: string;
   email: string;
@@ -53,3 +54,60 @@ export interface PublicUserDTO extends Record<string, unknown> {
   userRole: UserRole;
 }
 
+/**
+ * 데이터베이스에서 조회한 raw user 객체(snake_case)를
+ * 애플리케이션에서 사용하는 UserDTO(camelCase)로 변환합니다.
+ * 이 함수는 타입 안전성을 보장하고, 외부 라이브러리 의존성을 제거합니다.
+ * @param dbUser - 데이터베이스에서 직접 조회한, 타입이 보장되지 않은 사용자 객체
+ * @returns 타입이 보장된 UserDTO 객체
+ */
+export function mapDbUserToUserDTO(dbUser: Record<string, any>): UserDTO {
+  return {
+    id: dbUser.id,
+    username: dbUser.username,
+    email: dbUser.email,
+    createdAt: dbUser.created_at,
+    subscriptionStartDate: dbUser.subscription_start_date ?? null,
+    subscriptionEndDate: dbUser.subscription_end_date ?? null,
+    isSubscriptionActive: dbUser.is_subscription_active,
+    updatedAt: dbUser.updated_at ?? null,
+    nickname: dbUser.nickname ?? null,
+    profileImageUrl: dbUser.profile_image_url ?? null,
+    deactivatedAt: dbUser.deactivated_at ?? null,
+    withdrawalAt: dbUser.withdrawal_at ?? null,
+    lastLoginAt: dbUser.last_login_at ?? null,
+    passwordLastChangedAt: dbUser.password_last_changed_at ?? null,
+    providerType: dbUser.provider_type ?? null,
+    providerId: dbUser.provider_id ?? null,
+    loginType: dbUser.login_type ?? null,
+    planType: dbUser.plan_type,
+    userRole: dbUser.user_role,
+    accountStatus: dbUser.account_status,
+  };
+}
+
+export function normalizeSnsUser(providerType: ProviderType, raw: any) {
+  if (providerType === ProviderType.KAKAO) {
+    return {
+      email: raw.kakao_account.email,
+      username: raw.properties.nickname,
+      nickname: raw.properties.nickname,
+      profileImageUrl: raw.properties.profile_image,
+      providerType: ProviderType.KAKAO,
+      providerId: String(raw.id),
+    };
+  }
+
+  if (providerType === ProviderType.NAVER) {
+    return {
+      email: raw.email,
+      username: raw.name,
+      nickname: raw.nickname,
+      profileImageUrl: raw.profile_image,
+      providerType: ProviderType.NAVER,
+      providerId: raw.id,
+    };
+  }
+
+  throw new Error(`Unsupported provider: ${providerType}`);
+}

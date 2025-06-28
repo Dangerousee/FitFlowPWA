@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import debounce from 'lodash.debounce';
-import apiClient from '@lib/shared/axios';
+import apiClient from '@lib/shared/network/axios';
 import { API_ROUTES } from '@routes/apis';
 
 

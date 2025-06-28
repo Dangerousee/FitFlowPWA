@@ -1,5 +1,5 @@
 import { useLogin } from '@/contexts/AuthContext';
-import { isLoggedIn } from '@lib';
+import { isLoggedIn } from '@/services/client/auth-storage.service';
 
 const HandleLogout = () => {
   // authLoading 상태 추가

@@ -1,9 +1,9 @@
 // pages/api/me.ts
 import type { NextApiResponse } from 'next';
-import { withAuth } from '@/lib/server/middleware/withAuth';
+import { withAuth } from '@lib/server/middleware/with-auth';
 import { NextApiRequestWithUser } from '@/types';
-import { getUserById } from '@/lib/server/db';
-import { transformUserToPublic } from '@lib/server/db';
+import { findById } from '@/services/server/user.service';
+import { transformUserToPublic } from '@lib/server/db/utils/transform-user';
 
 const handler = async (req: NextApiRequestWithUser, res: NextApiResponse) => {
   const { user } = req;
@@ -13,7 +13,7 @@ const handler = async (req: NextApiRequestWithUser, res: NextApiResponse) => {
   }
 
   try {
-    const dbUser = await getUserById(user.userId);
+    const dbUser = await findById(user.userId);
 
     if (!dbUser) {
       return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });

@@ -1,8 +1,9 @@
-// pages/api/auth/logout.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { supabase, hashToken } from '@/lib/shared';
-import { applyCors } from '@lib/server';
 import * as cookie from 'cookie';
+import { DB_TABLES } from '@/constants';
+import { applyCors } from '@lib/server/middleware';
+import { hashToken } from '@lib/shared/jwt';
+import { SupaQuery } from '@lib/server/db/utils/supa-query';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (applyCors(req, res)) return; // OPTIONS면 여기서 끝
@@ -20,10 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const hashedToken = hashToken(rawToken);
 
   // ✅ DB에서 세션 무효화
-  const { error } = await supabase
-    .from('refresh_sessions')
-    .update({ revoked: true })
-    .eq('refresh_token', hashedToken);
+  const { error } = await new SupaQuery(DB_TABLES.REFRESH_SESSIONS).update({ revoked: true }, {refresh_token: hashedToken}, true);
 
   if (error) {
     console.error('[logout] 세션 업데이트 실패:', error);

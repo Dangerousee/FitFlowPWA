@@ -1,7 +1,9 @@
 import { getCookie } from 'cookies-next';
-import { hashToken, issueAccessTokenFromPayload, supabase } from '@lib/shared';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { DB_TABLES } from '@/constants';
+import { hashToken, issueAccessTokenFromPayload } from '@lib/shared/jwt';
+import { FetchMode, SupaQuery } from '@lib/server/db/utils/supa-query';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const rawToken = getCookie('refreshToken', { req, res });
@@ -12,13 +14,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ✅ 1. 해시해서 DB 조회
   const hashedToken = hashToken(rawToken);
-  const { data: session } = await supabase
-    .from('refresh_sessions')
-    .select('*')
+  const { data: session } = await new SupaQuery(DB_TABLES.USERS)
     .eq('refresh_token', hashedToken)
     .eq('revoked', false)
     .gte('expires_at', new Date().toISOString())
-    .single();
+    .fetch(FetchMode.SINGLE);
+
 
   if (!session) {
     return res.status(401).json({ message: '세션이 만료되었거나 존재하지 않습니다.' });

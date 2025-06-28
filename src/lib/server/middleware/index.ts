@@ -1,2 +1,2 @@
 export * from './cors'
-export * from './withAuth'
+export * from './with-auth'

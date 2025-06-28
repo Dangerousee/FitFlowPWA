@@ -18,7 +18,6 @@ export const API_ROUTES = {
     LOGOUT: '/auth/logout',
     SIGN_UP: '/auth/sign-up',
     ME: '/auth/me',
-    LOOKUP: '/auth/lookup',
     DUPLICATE_CHECKER: '/auth/check-duplicate',
 
     KAKAO_AUTH: '/auth/kakao-auth',
@@ -32,6 +31,7 @@ export const API_ROUTES = {
     DETAIL: (postId: string | number) => `/posts/${postId}`,
   },
   USERS: {
+    LOOKUP: '/users/lookup',
     PROFILE: (userId: string | number) => `/users/${userId}/profile`,
   },
 } as const;

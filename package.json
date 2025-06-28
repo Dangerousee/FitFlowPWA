@@ -14,7 +14,6 @@
     "test": "npm run test:unit && npm run test:e2e"
   },
   "dependencies": {
-    "@ducanh2912/next-pwa": "^10.2.9",
     "@supabase/postgrest-js": "^1.19.4",
     "@supabase/supabase-js": "^2.50.0",
     "axios": "^1.10.0",
@@ -56,8 +55,5 @@
     "tailwindcss": "^4",
     "ts-jest": "^29.3.4",
     "typescript": "^5"
-  },
-  "volta": {
-    "node": "20.19.2"
   }
 }

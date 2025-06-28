@@ -1,16 +1,9 @@
-// src/pages/api/auth/login.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {
-  authenticateSupabaseUser,
-  checkPasswordPolicy,
-  checkUserAccountStatus,
-  createRefreshSession,
-  updateUserLoginDetails,
-  handleApiError,
-} from '@lib/server';
-import { issueAccessToken, issueRefreshToken } from '@lib/shared';
 import { LoginRequestDTO, LoginResponseDTO } from '@types';
-import { transformUserToPublic } from '@lib/server';
+import { handleApiErrors } from '@lib/server/errors/handle-api-errors';
+import * as AuthService from '@/services/server/auth.service';
+import { issueAccessToken, issueRefreshToken } from '@lib/shared/jwt';
+import { transformUserToPublic } from '@lib/server/db/utils/transform-user';
 
 function isBaseLoginRequest(value: any): boolean {
   return value && typeof value === 'object' && 'loginType' in value;
@@ -30,21 +23,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // 1. 사용자 인증
-    const user = await authenticateSupabaseUser(body);
+    const user = await AuthService.authUser(body);
 
     // 2. 계정 상태 / 보안 정책 확인
-    await checkUserAccountStatus(user);
-    await checkPasswordPolicy(user);
+    await AuthService.checkUserAccountStatus(user);
+    await AuthService.checkPasswordPolicy(user);
 
     // 3. 로그인 기록 업데이트
-    const updatedUser = await updateUserLoginDetails(user.id, operationTimestamp);
+    const updatedUser = await AuthService.updateUserLoginDetails(user.id, operationTimestamp);
 
     // 4. 토큰 발급
     const accessToken = issueAccessToken(updatedUser[0]);
     const refreshToken = issueRefreshToken(updatedUser[0]);
 
     // 5. refresh 세션 저장
-    await createRefreshSession(updatedUser[0], refreshToken, req);
+    await AuthService.createRefreshSession(updatedUser[0], refreshToken, req);
 
     // 6. HttpOnly 쿠키 설정
     res.setHeader('Set-Cookie', [
@@ -57,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       accessToken,
     } satisfies LoginResponseDTO);
   } catch (error) {
-    const { status, body } = handleApiError(error);
+    const { status, body } = handleApiErrors(error);
     console.error('로그인 API 오류:', body);
     return res.status(status).json(body);
   }

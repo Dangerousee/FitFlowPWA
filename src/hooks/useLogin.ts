@@ -3,18 +3,13 @@ import { useAutoLogout } from './useAutoLogout';
 import { useRouter } from 'next/router';
 import { LoginRequestDTO } from "@types";
 import { LoginType, ProviderType } from '@enums';
-import {
-  isLoggedIn as checkIsLoggedIn,
-  parseApiError,
-  removeAccessToken,
-  removeStoredUser,
-  setAccessToken, setStoredUser,
-} from '@lib/cleint';
-import apiClient from '@lib/shared/axios';
+import apiClient from '@lib/shared/network/axios';
 import { API_ROUTES } from '@routes/apis';
+import * as AuthStorageService from '@/services/client/auth-storage.service';
+import { parseApiErrors } from '@lib/cleint/errors/parse-api-errors';
 // import { useRouter } from 'next/router';
 
-const LOGOUT_MESSAGES = {
+export const LOGOUT_MESSAGES = {
   AUTO: '세션이 만료되어 자동으로 로그아웃되었습니다.',
   MANUAL: '수동으로 로그아웃되었습니다.',
 };
@@ -59,7 +54,7 @@ export function useLogin(): UseLoginResult {
   const router = useRouter();
 
   useEffect(() => {
-    if (checkIsLoggedIn()) {
+    if (AuthStorageService.isLoggedIn()) {
       setIsLoggedIn(true);
       // 필요하다면 여기서 토큰 유효성 검사 API 호출
     }
@@ -77,9 +72,9 @@ export function useLogin(): UseLoginResult {
       } finally {
         // 2. 클라이언트 상태 초기화
         if (typeof window !== 'undefined') {
-          removeAccessToken();
+          AuthStorageService.removeAccessToken();
         }
-        removeStoredUser();
+        AuthStorageService.removeStoredUser();
         setIsLoggedIn(false);
         setError(logoutMessage);
         console.log(logoutMessage);
@@ -101,8 +96,8 @@ export function useLogin(): UseLoginResult {
     setError(null);
     // setIsLoggedIn(false); // 로그인 실패 시에는 authLoading 후 isLoggedIn이 false로 유지됨
     if (typeof window !== 'undefined') {
-      removeAccessToken();
-      removeStoredUser();
+      AuthStorageService.removeAccessToken();
+      AuthStorageService.removeStoredUser();
     }
   };
 
@@ -122,8 +117,8 @@ export function useLogin(): UseLoginResult {
       console.log('로그인 성공:', data);
 
       if (typeof window !== 'undefined') {
-        setAccessToken(data.accessToken);
-        setStoredUser(data.user);
+        AuthStorageService.setAccessToken(data.accessToken);
+        AuthStorageService.setStoredUser(data.user);
       }
 
       setIsLoggedIn(true);
@@ -132,7 +127,7 @@ export function useLogin(): UseLoginResult {
 
     } catch (err: any) {
       console.error('Login processing error:', err);
-      const parsedError = parseApiError(err.response, err.response?.data);
+      const parsedError = parseApiErrors(err.response, err.response?.data);
 
       clearAuthErrorAndState();
       setIsLoggedIn(false);

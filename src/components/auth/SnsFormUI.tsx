@@ -1,11 +1,12 @@
 import { FaComment, FaGoogle, FaRegEnvelope } from 'react-icons/fa';
 import { useCallback, useEffect, useRef } from 'react';
-import { auth, fetchUserData, googleProvider, normalizeSnsUser, signInWithPopup } from '@lib/cleint';
 import { ProviderType } from '@enums';
 import { useLogin } from '@contexts/AuthContext';
 import { useSignUp } from '@hooks/useSignUp';
-import { USER_ALREADY_EXISTS, USER_NOT_FOUND } from '@constants/errorCodes';
-import { findUser } from '@lib/cleint/api';
+import { fetchUserData } from '@/services/client/auth-social.service';
+import { normalizeSnsUser } from '@types';
+import { findUser } from '@/services/client/user.service';
+import { auth, googleProvider, signInWithPopup } from '@lib/cleint/firebase';
 
 const ENV_MAP = {
   'kakao': {

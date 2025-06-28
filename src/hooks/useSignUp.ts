@@ -1,17 +1,8 @@
-/**
- * - email 중복: SNS 가입자가 같은 이메일을 쓰는 상황 방지
- * → login_type + email에 대한 복합 unique index 고려
- * - native 사용자만 password 저장
- * → DB에 password 컬럼은 nullable로 두고, SNS 유저는 null 처리
- * - login_type 누락 방지
- * → 회원가입 API나 로그인 라우트에서 login_type 미지정 방지 로직 추가
- */
 import { useState } from 'react';
-import { SignUpRequestDTO } from '@types';
+import { SignUpRequestDTO, UserDTO } from '@types';
 import { LoginType, ProviderType } from '@enums';
-import { parseApiError, } from '@lib';
-import apiClient from '@lib/shared/axios';
-import { API_ROUTES } from '@routes/apis';
+import { parseApiErrors } from '@lib/cleint/errors/parse-api-errors';
+import * as AuthService from '@/services/client/auth.service';
 
 // 회원가입 관련 훅의 반환 타입
 export interface UseSignUpResult {
@@ -96,15 +87,16 @@ export function useSignUp(): UseSignUpResult {
     setError(null);
     setLoading(true);
     try {
-      const { data } = await apiClient.post(API_ROUTES.AUTH.SIGN_UP, param);
+
+      const { data } = await AuthService.registerUser(param as UserDTO);
 
       console.log('회원가입 성공:', data);
       // 필요하면 여기서 setUser(data.user) 등도 가능
     } catch (err: any) {
-      console.error('SignUp processing error:', err.message);
+      console.error(ERROR_MESSAGES.SIGNUP_NETWORK, err.message);
 
-      const parsed = parseApiError(err.response, err.response?.data);
-      setError(ERROR_MESSAGES.SIGNUP_NETWORK + (parsed.message || ''));
+      const parsed = parseApiErrors(err.response, err.response?.data);
+      setError((parsed.message || ''));
       throw parsed;
     } finally {
       setLoading(false);

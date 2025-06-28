@@ -1,5 +1,5 @@
 import type { LoginType, ProviderType } from '@enums';
-import type { PublicUserDTO, UserDTO } from '@types';
+import type { PublicUserDTO } from '@types';
 
 export interface NativeLoginRequest {
   loginType: LoginType.NATIVE;
