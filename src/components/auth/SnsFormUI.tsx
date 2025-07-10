@@ -139,7 +139,7 @@ export default function SnsFormUI() {
 
       console.log({resposne});
 
-      if (!resposne || !resposne.user) {
+      if (!resposne) {
         const shouldSignUp = confirm(
           '아직 우리 커뮤니티의 멤버가 아니시네요!\n회원가입을 진행하시겠어요?',
         );
