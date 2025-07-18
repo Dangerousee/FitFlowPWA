@@ -1,3 +1,6 @@
+/**
+ * @Deprecated
+ */
 import { useState, useCallback, useEffect } from 'react';
 import { useAutoLogout } from './useAutoLogout';
 import { useRouter } from 'next/router';
@@ -54,7 +57,7 @@ export function useLogin(): UseLoginResult {
   const router = useRouter();
 
   useEffect(() => {
-    if (AuthStorageService.isLoggedIn()) {
+    if (AuthStorageService.hasAuthDataInStorage()) {
       setIsLoggedIn(true);
       // 필요하다면 여기서 토큰 유효성 검사 API 호출
     }
@@ -84,7 +87,7 @@ export function useLogin(): UseLoginResult {
         }
       }
     },
-    [/* router */]
+    [router, isLoggedIn]
   );
 
   useAutoLogout({
@@ -99,13 +102,6 @@ export function useLogin(): UseLoginResult {
       AuthStorageService.removeAccessToken();
       AuthStorageService.removeStoredUser();
     }
-  };
-
-  const handleNativeLogin = async (email: string, password: string) => {
-    return handleLogin({ email, password, loginType: LoginType.NATIVE });
-  };
-  const handleSocialLogin = async (providerType: ProviderType, providerId: string) => {
-    return handleLogin({ providerType, providerId, loginType: LoginType.SOCIAL });
   };
 
   const handleLogin = async (param: LoginRequestDTO) => {
@@ -136,6 +132,13 @@ export function useLogin(): UseLoginResult {
       setLoading(false);
     }
 
+  };
+
+  const handleNativeLogin = async (email: string, password: string) => {
+    return handleLogin({ email, password, loginType: LoginType.NATIVE });
+  };
+  const handleSocialLogin = async (providerType: ProviderType, providerId: string) => {
+    return handleLogin({ providerType, providerId, loginType: LoginType.SOCIAL });
   };
 
   const handleLogout = (destinationUrl?: string | null) => {

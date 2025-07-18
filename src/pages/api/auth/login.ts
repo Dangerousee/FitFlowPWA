@@ -33,11 +33,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const updatedUser = await AuthService.updateUserLoginDetails(user.id, operationTimestamp);
 
     // 4. 토큰 발급
-    const accessToken = issueAccessToken(updatedUser[0]);
-    const refreshToken = issueRefreshToken(updatedUser[0]);
+    const accessToken = issueAccessToken(updatedUser);
+    const refreshToken = issueRefreshToken(updatedUser);
 
     // 5. refresh 세션 저장
-    await AuthService.createRefreshSession(updatedUser[0], refreshToken, req);
+    await AuthService.createRefreshSession(updatedUser, refreshToken, req);
 
     // 6. HttpOnly 쿠키 설정
     res.setHeader('Set-Cookie', [
@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // 7. 응답 반환
     return res.status(200).json({
-      user: transformUserToPublic(updatedUser[0]),
+      user: transformUserToPublic(updatedUser),
       accessToken,
     } satisfies LoginResponseDTO);
   } catch (error) {

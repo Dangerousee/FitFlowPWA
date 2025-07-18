@@ -9,6 +9,10 @@ import { NextApiRequest } from 'next';
 import { hashToken } from '@lib/shared/jwt';
 import { FetchMode, SupaQuery, buildInsertQuery, buildUpdateQuery } from '@lib/server/db';
 
+const PASSWORD_POLICY_DAYS = 90;
+const REFRESH_TOKEN_EXPIRY_DAYS = 7;
+const REFRESH_TOKEN_EXPIRY_MS = REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+
 export async function authUser(body: LoginRequestDTO): Promise<UserDTO> {
   switch (body.loginType) {
     case LoginType.NATIVE:
@@ -125,18 +129,6 @@ export async function authSocialUser(providerType: ProviderType, providerId: str
     };
   }
 
-  const isTypeMatch = providerType === userProfile.providerType;
-  const idMatch = providerId === userProfile.providerId;
-
-  if (!isTypeMatch || !idMatch) {
-    console.warn(`로그인 시도 실패 (${errMessage}): 로그인 정보 불일치.`);
-    throw {
-      statusCode: StatusCodes.UNAUTHORIZED,
-      message: '이메일 또는 비밀번호가 올바르지 않습니다.',
-      code: ERROR_CODES.AUTH.INVALID_CREDENTIALS,
-    };
-  }
-
   return userProfile;
 }
 
@@ -186,10 +178,9 @@ export async function checkUserAccountStatus(user: UserDTO): Promise<void> {
  * 비밀번호 만료일 확인
  */
 export async function checkPasswordPolicy(user: UserDTO): Promise<void> {
-  const passwordPolicyDays = 90;
   if (user.passwordLastChangedAt) {
     const lastChanged = new Date(user.passwordLastChangedAt);
-    const expiryDate = new Date(lastChanged.setDate(lastChanged.getDate() + passwordPolicyDays));
+    const expiryDate = new Date(lastChanged.setDate(lastChanged.getDate() + PASSWORD_POLICY_DAYS));
     if (new Date() > expiryDate) {
       throw {
         statusCode: StatusCodes.FORBIDDEN,
@@ -204,7 +195,7 @@ export async function checkPasswordPolicy(user: UserDTO): Promise<void> {
 /**
  * Supabase 사용자의 최종 로그인 시간 및 상태를 업데이트
  */
-export async function updateUserLoginDetails(userId: string, timestamp: string): Promise<UserDTO[]> {
+export async function updateUserLoginDetails(userId: string, timestamp: string): Promise<UserDTO> {
   const { data: updatedUser, error } = await buildUpdateQuery<UserDTO>(
     DB_TABLES.USERS,
     { last_login_at: timestamp,
@@ -222,18 +213,18 @@ export async function updateUserLoginDetails(userId: string, timestamp: string):
       code: ERROR_CODES.DB.SUPABASE_LOGIN_UPDATE_FAILED,
     };
   }
-  return updatedUser || [];
+  return updatedUser![0];
 }
 
 export async function createRefreshSession(
   user: UserDTO,
   refreshToken: string,
   req: NextApiRequest
-): Promise<RefreshSession[]> {
+): Promise<RefreshSession> {
   const deviceInfo = req.headers['user-agent'] || 'unknown';
   const ipAddress = req.socket?.remoteAddress || null;
   const now = new Date();
-  const expires = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7일 후
+  const expires = new Date(now.getTime() + REFRESH_TOKEN_EXPIRY_MS); // 7일 후
   const hashedRefreshToken = hashToken(refreshToken);
 
   const { data, error } = await buildInsertQuery<RefreshSession>(
@@ -259,5 +250,5 @@ export async function createRefreshSession(
     };
   }
 
-  return data ?? [];
+  return data![0]; // 단일 객체 반환
 }

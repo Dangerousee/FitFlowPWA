@@ -1,5 +1,4 @@
 import { FaComment, FaGoogle, FaRegEnvelope } from 'react-icons/fa';
-import { useCallback, useEffect, useRef } from 'react';
 import { ProviderType } from '@enums';
 import { useLogin } from '@contexts/AuthContext';
 import { useSignUp } from '@hooks/useSignUp';
@@ -7,6 +6,8 @@ import { fetchUserData } from '@/services/client/auth-social.service';
 import { normalizeSnsUser } from '@types';
 import { findUser } from '@/services/client/user.service';
 import { auth, googleProvider, signInWithPopup } from '@lib/cleint/config/firebase';
+import { useSnsOAuth } from '@hooks/useSnsOauth';
+import { useState } from 'react';
 
 const ENV_MAP = {
   'kakao': {
@@ -19,90 +20,13 @@ const ENV_MAP = {
   },
 };
 
-interface SnsAuthProps {
-  providerType: ProviderType;
-  url: string;
-  state?: string;
-  onSuccess?: (code: string, state?: string | undefined) => void;
-  onError?: (err: string | undefined) => void;
-}
-
 export default function SnsFormUI() {
-  // 메시지 핸들러 참조 저장
-  const messageHandlerRef = useRef<((event: MessageEvent) => void) | null>(null);
+  const { isLoggedIn, } = useLogin();
+  const { handleSocialSignUp } = useSignUp();
+  const { login: openSnsPopup, loading: snsPopupLoading } = useSnsOAuth();
+  const [isProcessing, setIsProcessing] = useState(false); // 통합 로딩 상태
 
-  const { isLoggedIn, loading, setLoading } = useLogin();
-  const { error, loading: signUpLoading, setLoading: setSignUpLoading, handleSocialSignUp } = useSignUp();
-
-  // 기존 메시지 핸들러 제거 함수
-  // - `window.removeEventListener`를 호출하여 이전 핸들러 삭제
-  // - `messageHandlerRef.current`를 null로 초기화하여 중복 실행 방지
-  const removePreviousMessageHandler = useCallback(() => {
-    if (messageHandlerRef.current) {
-      window.removeEventListener('message', messageHandlerRef.current);
-      messageHandlerRef.current = null;
-    }
-  }, []);
-
-  // 컴포넌트가 언마운트될 때 메시지 핸들러 제거
-  useEffect(() => {
-    return () => {
-      removePreviousMessageHandler();
-    };
-  }, [removePreviousMessageHandler]);
-
-  // 로그인 공통 핸들러
-  // - provider(kakao, naver)에 따라 로그인 URL을 생성하고 팝업창을 열어 OAuth 인증 수행
-  // - `window.addEventListener`를 사용해 로그인 완료 후 메시지를 수신
-  // - 네이버의 경우, CSRF 방지를 위해 `state` 검증 수행
-  const handleAuth = (snsAuthProps: SnsAuthProps) => {
-    const { providerType, url, state, onSuccess, onError } = snsAuthProps;
-    removePreviousMessageHandler(); // 중복 방지
-
-    const popup = window.open(url, '_blank', 'width=600,height=800'); // 로그인 팝업 열기
-
-    if (!popup) {
-      onError?.(`${providerType} 로그인 창 열기 실패`);
-      return;
-    }
-
-    // 팝업 닫힘 감지 타이머
-    const popupCheckInterval = setInterval(() => {
-      if (popup.closed) {
-        clearInterval(popupCheckInterval);
-        if (!signUpLoading) {
-          setLoading(false);
-        }
-        // message 핸들러도 제거
-        if (messageHandlerRef.current) {
-          window.removeEventListener('message', messageHandlerRef.current);
-          messageHandlerRef.current = null;
-        }
-      }
-    }, 500); // 0.5초마다 팝업 상태 확인
-
-    const newMessageHandler = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return; // 보안상 출처 검증
-      console.log(`${providerType} 로그인 메시지 수신:`, event.data);
-
-      // 이전 핸들러가 존재하면 제거하여 중복 실행 방지
-      if (messageHandlerRef.current) {
-        window.removeEventListener('message', messageHandlerRef.current);
-        messageHandlerRef.current = null;
-      }
-
-      if (event.data.success) {
-        console.log(`${providerType} 로그인 성공, 코드:`, event.data.code);
-        onSuccess?.(event.data.code, state);
-      } else {
-        onError?.(`${providerType} 로그인 실패: ${event.data.error}`);
-      }
-    };
-
-    // 새로운 메시지 핸들러 등록
-    messageHandlerRef.current = newMessageHandler;
-    window.addEventListener('message', newMessageHandler);
-  };
+  const loading = isProcessing || snsPopupLoading;
 
   async function trySocialSignUp(data: any) {
     try {
@@ -118,32 +42,21 @@ export default function SnsFormUI() {
     providerType,
     code,
     state,
-    receivedState,
   }: {
     providerType: ProviderType;
     code: string;
     state?: string;
-    receivedState?: string;
   }) => {
-    if (providerType === ProviderType.NAVER && state && state !== receivedState) {
-      console.error('로그인 실패: state 값이 일치하지 않습니다.');
-      return;
-    }
 
-    setLoading(true);
+    setIsProcessing(true);
 
     try {
       const snsUserRaw = await fetchUserData(providerType, code, state);
       const snsUser = normalizeSnsUser(providerType, snsUserRaw);
-      const resposne = await findUser({ providerType: providerType, providerId: snsUser.providerId});
+      const existingUser = await findUser({ providerType: providerType, providerId: snsUser.providerId});
 
-      console.log({resposne});
-
-      if (!resposne) {
-        const shouldSignUp = confirm(
-          '아직 우리 커뮤니티의 멤버가 아니시네요!\n회원가입을 진행하시겠어요?',
-        );
-        if (shouldSignUp) {
+      if (!existingUser) {
+        if (confirm('아직 우리 커뮤니티의 멤버가 아니시네요!\n회원가입을 진행하시겠어요?')) {
           await trySocialSignUp(snsUser);
         }
       } else {
@@ -155,9 +68,10 @@ export default function SnsFormUI() {
       }
 
     } catch (err: any) {
+      console.error(`${providerType} 처리 중 오류:`, err);
       alert('알 수 없는 오류가 발생했습니다.');
     } finally {
-      setLoading(false);
+      setIsProcessing(false);
     }
   };
 
@@ -178,28 +92,23 @@ export default function SnsFormUI() {
     return '';
   };
 
-  const handleSnsLogin = (provider: ProviderType) => {
-    const state = Math.random().toString(36).substring(2);
+  const handleSnsLogin = async(provider: ProviderType) => {
+    const state = provider === ProviderType.NAVER ? Math.random().toString(36).substring(2) : undefined;
     const loginUrl = getSnsLoginUrl(provider, state);
 
-    setSignUpLoading(true);
-    setLoading(true);
+    const result = await openSnsPopup({ providerType: provider, url: loginUrl });
 
-    handleAuth({
-      providerType: provider,
-      url: loginUrl,
-      state,
-      onSuccess: (code, state) =>
-        processSnsLoginAndRegister({
-          providerType: provider,
-          code: code,
-          state: state,
-          receivedState: state,
-        }),
-      onError: err => {
-        console.error(`${provider} 로그인 실패:`, err);
-      },
-    });
+    if (result.code) {
+      // 네이버의 경우 state 검증이 필요하지만, 현재 로직에서는 postMessage로 state를 받지 않으므로 생략
+      // 필요하다면 콜백 페이지에서 state를 함께 postMessage로 전달 필요
+      await processSnsLoginAndRegister({
+        providerType: provider,
+        code: result.code,
+        state: state,
+      });
+    } else if (result.error) {
+      console.error(`${provider} 로그인 실패:`, result.error);
+    }
   };
 
   // 카카오 로그인
@@ -210,6 +119,7 @@ export default function SnsFormUI() {
 
   // 구글 로그인
   const handleGoogleLogin = async () => {
+    setIsProcessing(true);
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const userInfo = result.user;
@@ -217,6 +127,8 @@ export default function SnsFormUI() {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error('Google 로그인 오류:', message);
+    } finally {
+      setIsProcessing(false);
     }
   };
 

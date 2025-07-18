@@ -8,4 +8,6 @@ export const transformUserToPublic = (user: UserDTO): PublicUserDTO => ({
   profileImageUrl: user.profileImageUrl,
   planType: user.planType,
   userRole: user.userRole,
+  accountStatus: user.accountStatus,
+  isSubscriptionActive: user.isSubscriptionActive,
 });

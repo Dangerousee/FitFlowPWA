@@ -44,15 +44,19 @@ export interface UserDTO {
 }
 
 // 보안을 이유로 클라이언트에게 내려줄것만 별도 DTO로 정의
-export interface PublicUserDTO {
-  id: string;
-  username: string;
-  email: string;
-  nickname?: string | null;
-  profileImageUrl?: string | null;
-  planType: UserPlanType;
-  userRole: UserRole;
-}
+export type PublicUserDTO = Pick<
+  UserDTO,
+  | 'id'
+  | 'username'
+  | 'email'
+  | 'nickname'
+  | 'profileImageUrl'
+  | 'planType'
+  | 'userRole'
+  // --- 추천 필드 추가 ---
+  | 'accountStatus' // 클라이언트가 계정 상태에 따라 적절히 반응하도록 하기 위함
+  | 'isSubscriptionActive' // 구독 기반 기능 제어 로직을 단순화하기 위함
+>;
 
 /**
  * 데이터베이스에서 조회한 raw user 객체(snake_case)를

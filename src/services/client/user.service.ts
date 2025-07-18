@@ -5,14 +5,14 @@ import { getAccessToken, getStoredUser } from '@/services/client/auth-storage.se
 
 /** 로그인 된 사용자의 유효성 체크시 사용 */
 export const getMe = async (): Promise<PublicUserDTO> => {
-  const userId = getStoredUser();
+  const user = getStoredUser();
 
-  if (!userId) {
+  if (!user) {
     throw new Error('로그인된 사용자 ID를 찾을 수 없습니다.');
   }
 
-  const endpoint = userId
-    ? `${API_ROUTES.AUTH.ME}?userId=${encodeURIComponent(userId)}`
+  const endpoint = user.id
+    ? `${API_ROUTES.AUTH.ME}?userId=${encodeURIComponent(user.id)}`
     : API_ROUTES.AUTH.ME;
 
   const { data } = await apiClient.get(endpoint, {

@@ -1,14 +1,19 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { SignUpRequestDTO, UserDTO } from '@types';
 import { LoginType, ProviderType } from '@enums';
 import { parseApiErrors } from '@lib/cleint/errors/parse-api-errors';
 import * as AuthService from '@/services/client/auth.service';
 
+
+// --- 타입 정의 ---
+export interface UseSignUpParams {
+  onSuccess?: (data: UserDTO) => void; // 성공 시 호출될 콜백
+}
+
 // 회원가입 관련 훅의 반환 타입
 export interface UseSignUpResult {
   error: string | null;
   loading: boolean;
-  setLoading: (loading: boolean) => void;
 
   handleNativeSignUp: (params: {
     email: string;
@@ -28,7 +33,7 @@ export interface UseSignUpResult {
   }) => Promise<any>;
 }
 
-export function useSignUp(): UseSignUpResult {
+export function useSignUp({ onSuccess }: UseSignUpParams = {}): UseSignUpResult {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -42,6 +47,26 @@ export function useSignUp(): UseSignUpResult {
     const randomNumber = Math.floor(1000 + Math.random() * 9000);
     return `${prefix}_${randomNumber}`;
   }
+
+  const handleSignUp = useCallback(async (param: SignUpRequestDTO) => {
+    setError(null);
+    setLoading(true);
+    try {
+
+      const { data } = await AuthService.registerUser(param as UserDTO);
+
+      console.log('회원가입 성공:', data);
+      onSuccess?.(data);
+    } catch (err: any) {
+      console.error(ERROR_MESSAGES.SIGNUP_NETWORK, err.message);
+
+      const parsed = parseApiErrors(err.response, err.response?.data);
+      setError((parsed.message || '알 수 없는 오류'));
+      throw parsed;
+    } finally {
+      setLoading(false);
+    }
+  }, [onSuccess]);
 
   const handleNativeSignUp = async (params: {
     email: string;
@@ -83,31 +108,9 @@ export function useSignUp(): UseSignUpResult {
     });
   };
 
-  const handleSignUp = async (param: SignUpRequestDTO) => {
-    setError(null);
-    setLoading(true);
-    try {
-
-      const { data } = await AuthService.registerUser(param as UserDTO);
-
-      console.log('회원가입 성공:', data);
-      // 필요하면 여기서 setUser(data.user) 등도 가능
-    } catch (err: any) {
-      console.error(ERROR_MESSAGES.SIGNUP_NETWORK, err.message);
-
-      const parsed = parseApiErrors(err.response, err.response?.data);
-      setError((parsed.message || ''));
-      throw parsed;
-    } finally {
-      setLoading(false);
-    }
-
-  };
-
   return {
     error,
     loading,
-    setLoading,
     handleNativeSignUp,
     handleSocialSignUp,
   };

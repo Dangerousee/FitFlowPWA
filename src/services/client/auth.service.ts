@@ -11,7 +11,8 @@ export const fetchUserInfo = async (
   try {
     const { data } = await apiClient.post(url, { accessToken });
 
-    AuthStorageService.setItem(`${providerType}_token`, accessToken);
+    // TODO 저장할 필요가 있나?
+    // AuthStorageService.setItem(`${providerType}_token`, accessToken);
     console.log(`${providerType} 사용자 정보:`, data);
 
     return data;
